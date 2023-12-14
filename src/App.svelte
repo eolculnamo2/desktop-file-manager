@@ -1,5 +1,26 @@
 <script lang="ts">
-  import Greet from './lib/Greet.svelte'
+import { listen } from '@tauri-apps/api/event';
+ import { invoke } from "@tauri-apps/api/tauri"
+import Greet from './lib/Greet.svelte'
+
+
+// Still some things to figure out
+// but at least we're loading the list!!!
+// Next is improving this then we'll make an add app button :)
+
+let appList = [];
+
+// TODO fix any
+listen("list-upated", (result: any) => {
+   console.log('payload', result.payload);
+   appList = result.payload.Ok;
+})
+
+
+  async function loadList(){
+    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+    await invoke("app_list_changed");
+  }
 </script>
 
 <main class="container">
@@ -17,10 +38,11 @@
     </a>
   </div>
 
-  <p>
-    Click on the Tauri, Vite, and Svelte logos to learn more.
-  </p>
-
+  <div>Derp</div>
+  <button on:click={loadList}>LOAD ME</button>
+  {#each appList as item}
+      <div>{item.name}</div>
+  {/each}
   <div class="row">
     <Greet />
   </div>

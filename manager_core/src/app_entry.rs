@@ -1,10 +1,12 @@
-#[derive(Debug, Clone)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Access {
     Shared,
     User,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AppType {
     Application,
     Link,
@@ -33,7 +35,7 @@ impl From<String> for AppType {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Encoding {
     UTF8,
     Other(String),
@@ -48,7 +50,7 @@ pub enum Encoding {
 /// Exec the command that is used to start the application from a shell.
 /// Terminal whether the application should be run in a terminal, valid values are true or false
 /// Categories semi-colon (;) separated list of menu categories in which the entry should be shown
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AppEntry {
     pub app_type: AppType,
     pub encoding: Encoding,

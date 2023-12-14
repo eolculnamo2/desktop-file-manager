@@ -1,22 +1,22 @@
-use std::{
-    fs::{read_dir, ReadDir},
-    rc::Rc,
-};
+use std::fs::{read_dir, ReadDir};
+
+use serde::{Deserialize, Serialize};
 
 use crate::{
-    app_entry::{AppEntry, AppType},
+    app_entry::AppEntry,
     constants::location_constants::{get_shared_app, get_user_app},
     desktop_file_parser::{self, DesktopFileParseError},
 };
 
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ListAppError {
-    IoError(std::io::Error),
+    IoError,
     ParseAppError(DesktopFileParseError),
 }
 
 impl From<std::io::Error> for ListAppError {
-    fn from(value: std::io::Error) -> Self {
-        Self::IoError(value)
+    fn from(_: std::io::Error) -> Self {
+        Self::IoError
     }
 }
 

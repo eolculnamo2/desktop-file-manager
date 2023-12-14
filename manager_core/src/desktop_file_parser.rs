@@ -1,5 +1,7 @@
 use std::path::Path;
 
+use serde::{Deserialize, Serialize};
+
 use crate::app_entry::{AppEntry, AppType, EntryTypes};
 
 //[Desktop Entry]
@@ -44,7 +46,7 @@ fn get_property_from_text_line(line: &str) -> Option<EntryTypes> {
     None
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum DesktopFileParseError {
     InvalidHeader,
     ReadError,
