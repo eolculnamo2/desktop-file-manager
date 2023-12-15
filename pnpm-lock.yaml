@@ -19,6 +19,12 @@ devDependencies:
   '@tsconfig/svelte':
     specifier: ^5.0.0
     version: 5.0.2
+  carbon-components-svelte:
+    specifier: ^0.82.4
+    version: 0.82.4
+  carbon-icons-svelte:
+    specifier: ^12.4.0
+    version: 12.4.0
   svelte:
     specifier: ^4.0.5
     version: 4.2.8
@@ -512,6 +518,16 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
+  /carbon-components-svelte@0.82.4:
+    resolution: {integrity: sha512-fuqMl+KNJXMlGhuwK4M11ZnGcbHF6nR7TOiiq6UJr5ALCCen4jk71sMAOurUWbOTOVe4DXM4z+Sb6/BV/Gf1Ag==}
+    dependencies:
+      flatpickr: 4.6.9
+    dev: true
+
+  /carbon-icons-svelte@12.4.0:
+    resolution: {integrity: sha512-UAPPbPSIC6lk1akCIJdY31pCVo8GE5AfNMHm3hjXLMbuQOHUBFSg1RyirH9WUkHxcwwQaotarz7/2EOdVvZSKg==}
+    dev: true
+
   /chokidar@3.5.3:
     resolution: {integrity: sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==}
     engines: {node: '>= 8.10.0'}
@@ -638,6 +654,10 @@ packages:
     engines: {node: '>=8'}
     dependencies:
       to-regex-range: 5.0.1
+    dev: true
+
+  /flatpickr@4.6.9:
+    resolution: {integrity: sha512-F0azNNi8foVWKSF+8X+ZJzz8r9sE1G4hl06RyceIaLvyltKvDl6vqk9Lm/6AUUCi5HWaIjiUbk7UpeE/fOXOpw==}
     dev: true
 
   /fs.realpath@1.0.0:

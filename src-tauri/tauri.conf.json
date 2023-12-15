@@ -11,10 +11,14 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false,
+      "all": true,
       "shell": {
         "all": false,
         "open": true
+      },
+      "protocol": {
+        "asset": true,
+        "assetScope": ["**"]
       }
     },
     "bundle": {
@@ -29,10 +33,10 @@
         "icons/icon.ico"
       ]
     },
-    "security": {
-      "csp": null
-    },
-    "windows": [
+  "security": {
+    "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost"
+  },  
+  "windows": [
       {
         "fullscreen": false,
         "resizable": true,

@@ -51,6 +51,7 @@ pub enum Encoding {
 /// Terminal whether the application should be run in a terminal, valid values are true or false
 /// Categories semi-colon (;) separated list of menu categories in which the entry should be shown
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct AppEntry {
     pub app_type: AppType,
     pub encoding: Encoding,

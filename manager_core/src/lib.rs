@@ -1,3 +1,5 @@
+// Goal is to make this available to both UI and CLI
+
 pub mod app_entry;
 pub mod app_finder;
 mod constants;
