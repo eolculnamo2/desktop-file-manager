@@ -1,21 +1,9 @@
 <script lang="ts">
     import AppEntryList from "../lib/AppEntryList/AppEntryList.svelte";
-    import { invoke } from "@tauri-apps/api/tauri";
     import { onMount } from "svelte";
-    import { AppEntry, type AppEntryResponse } from "../modules/AppEntry";
     import PrimaryLayout from "../layouts/PrimaryLayout.svelte";
     import { PageName, goToPage } from "../store/nav_store";
-
-    let sharedApps: AppEntry[] = [];
-    let myApps: AppEntry[] = [];
-
-    async function loadList() {
-        const newShared = await invoke<AppEntryResponse[]>("get_shared_apps");
-        sharedApps = newShared.map(AppEntry.create);
-
-        const newMine = await invoke<AppEntryResponse[]>("get_user_apps");
-        myApps = newMine.map(AppEntry.create);
-    }
+    import { loadList, myApps, sharedApps } from "../store/entries_store";
 
     onMount(() => {
         loadList();
@@ -35,13 +23,13 @@
     <svelte:fragment slot="body">
         <h3>My Apps</h3>
         <AppEntryList
-            entries={myApps}
+            entries={$myApps}
             onEntryClick={(entry) =>
                 goToPage({ page: PageName.VIEW_APP_ENTRY, entry })}
         />
         <h3>Shared Apps</h3>
         <AppEntryList
-            entries={sharedApps}
+            entries={$sharedApps}
             onEntryClick={(entry) =>
                 goToPage({ page: PageName.VIEW_APP_ENTRY, entry })}
         />

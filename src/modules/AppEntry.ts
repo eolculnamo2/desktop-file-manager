@@ -23,6 +23,7 @@ export type AppEntryResponse = {
     exec: string;
     terminal: boolean;
     categories: string[];
+    absolutePath: string,
 }
 export class AppEntry {
     appType: AppType = APP_TYPE.Application;
@@ -33,6 +34,21 @@ export class AppEntry {
     exec: string = "No command";
     terminal: boolean = false;
     categories: string[] = [];
+    absolutePath: string = "invalid";
+
+    static toResponse(entry: AppEntry): AppEntryResponse {
+        return {
+            appType: entry.appType,
+            encoding: entry.encoding.kind,
+            name: entry.name,
+            comment: entry.comment,
+            icon: entry.icon,
+            exec: entry.exec,
+            terminal: entry.terminal,
+            categories: entry.categories,
+            absolutePath: entry.absolutePath,
+        }
+    }
 
     // TODO see how Other actually gets deserialized
     static create(response: AppEntryResponse): AppEntry {
@@ -53,6 +69,7 @@ export class AppEntry {
         newEntry.exec = response.exec;
         newEntry.terminal = response.terminal;
         newEntry.categories = response.categories;
+        newEntry.absolutePath = response.absolutePath;
         return newEntry
     }
 }

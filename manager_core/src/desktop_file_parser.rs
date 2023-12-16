@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
@@ -63,9 +63,9 @@ impl From<std::io::Error> for DesktopFileParseError {
 #[cfg(test)]
 const SAMPLE: &'static [u8]  = b"[Desktop Entry]\nVersion=1.1\nType=Application\nName=Firefox\nGenericName=Firefox\nComment=A small descriptive blurb about this application.\nIcon=/Apps/firefox/browser/chrome/icons/default/default48.png\nExec=/Apps/firefox/firefox\nActions=\nCategories=WebBrowser;X-GNOME-Other;X-GNOME-WebApplications;\n";
 
-pub fn get_entry_from_file<P: AsRef<Path>>(location: P) -> Result<AppEntry, DesktopFileParseError> {
+pub fn get_entry_from_file(location: PathBuf) -> Result<AppEntry, DesktopFileParseError> {
     #[cfg(not(test))]
-    let file = std::fs::read(location)?;
+    let file = std::fs::read(location.clone())?;
 
     #[cfg(test)]
     let file = SAMPLE;
@@ -78,7 +78,7 @@ pub fn get_entry_from_file<P: AsRef<Path>>(location: P) -> Result<AppEntry, Desk
     }
 
     let parts = text.split('\n');
-    let mut app_entry = AppEntry::new();
+    let mut app_entry = AppEntry::new(location);
     for part in parts {
         if let Some(value) = get_property_from_text_line(part) {
             match value {
@@ -105,7 +105,7 @@ mod tests {
 
     #[test]
     fn returns_valid_app_entry() -> Result<(), ()> {
-        let some_str = "foo";
+        let some_str = PathBuf::from("foo");
         let result = get_entry_from_file(some_str);
         assert!(result.is_ok());
         let app_entry = result.unwrap();

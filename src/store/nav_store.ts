@@ -13,5 +13,8 @@ export type Pages =
 const _currentPage = writable<Pages>({ page: PageName.INDEX });
 export const currentPage = readonly(_currentPage);
 
-export const goToPage = (nextPage: Pages) => _currentPage.set(nextPage);
+export const goToPage = (nextPage: Pages) => {
+    _currentPage.set(nextPage);
+    window.scrollTo(0, 0);
+}
 

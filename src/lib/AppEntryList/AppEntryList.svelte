@@ -11,7 +11,6 @@
         StructuredListBody,
         StructuredListInput,
     } from "carbon-components-svelte";
-    import CheckmarkFilled from "carbon-icons-svelte/lib/CheckmarkFilled.svelte";
 </script>
 
 <StructuredList selection selected="row-1-value">
@@ -41,13 +40,7 @@
                     title="row-{i}-title"
                     name="row-{i}-name"
                 />
-                <StructuredListCell>
-                    <CheckmarkFilled
-                        class="bx--structured-list-svg"
-                        aria-label="select an option"
-                        title="select an option"
-                    />
-                </StructuredListCell>
+                <StructuredListCell></StructuredListCell>
             </StructuredListRow>
         {/each}
     </StructuredListBody>

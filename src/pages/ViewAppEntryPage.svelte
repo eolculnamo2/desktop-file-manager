@@ -1,6 +1,6 @@
 <script lang="ts">
     import PrimaryLayout from "../layouts/PrimaryLayout.svelte";
-    import { ENCODING, type AppEntry } from "../modules/AppEntry";
+    import { ENCODING, AppEntry, APP_TYPE } from "../modules/AppEntry";
     import {
         Form,
         Button,
@@ -10,37 +10,93 @@
         RadioButton,
         Select,
         SelectItem,
+        Toggle,
+        Grid,
+        Row,
+        Column,
     } from "carbon-components-svelte";
     import { PageName, goToPage } from "../store/nav_store";
     import { convertFileSrc } from "@tauri-apps/api/tauri";
+    import AlignRight from "../lib/AlignRight.svelte";
+    import { emit } from "@tauri-apps/api/event";
 
     // LEFT OFF HERE. NEED TO FIGURE OUT WHERE ICONS
     // ARE LOCATED FOR SHARED APPS
     export let entry: AppEntry;
     let form = structuredClone(entry);
+
+    // TODO make location for this configurable
+    // Want to also benchmark rayon for reading desktop files
+    function getIconSrc(icon: Nullish<string>) {
+        if (!icon) {
+            return "/tauri.svg";
+        } else if (icon.startsWith("/")) {
+            // assume absolute path
+            return convertFileSrc(icon);
+        } else {
+            return convertFileSrc(
+                // this really isn't acceptable as it is.
+                // Need this to be able to more intelligently infer location
+                // https://askubuntu.com/questions/153575/where-does-gnome-nautilus-store-directory-icons
+                `/usr/share/icons/hicolor/symbolic/apps/${icon}-symbolic.svg`,
+            );
+        }
+    }
 </script>
 
 <PrimaryLayout>
     <svelte:fragment slot="header">
-        <Button kind="ghost" on:click={() => goToPage({ page: PageName.INDEX })}
-            >Back</Button
-        >
-        <h1 class="title">Edit {entry.name}</h1>
-        <div class="row">
-            <img
-                src={entry.icon ? convertFileSrc(entry.icon) : "/tauri.svg"}
-                class="logo tauri"
-                alt={entry.icon ? entry.name : "Tauri Icon"}
-            />
-        </div>
+        <Grid>
+            <Row>
+                <div>
+                    <Button
+                        kind="ghost"
+                        on:click={() => goToPage({ page: PageName.INDEX })}
+                        >Back</Button
+                    >
+                </div>
+                <Column>
+                    <h1 class="title">Edit {entry.name}</h1>
+                    <div class="row">
+                        <img
+                            src={getIconSrc(entry.icon)}
+                            class="logo tauri"
+                            alt={entry.icon ? entry.name : "Tauri Icon"}
+                        />
+                    </div>
+                </Column>
+            </Row>
+        </Grid>
     </svelte:fragment>
     <svelte:fragment slot="body">
         <Form
             on:submit={(e) => {
                 e.preventDefault();
+                emit("entry_update", AppEntry.toResponse(form));
             }}
         >
-            <TextInput inline labelText="App Name" bind:value={form.name} />
+            <FormGroup>
+                <TextInput inline labelText="App Name" bind:value={form.name} />
+            </FormGroup>
+            <FormGroup>
+                <TextInput
+                    inline
+                    labelText="Comments"
+                    bind:value={form.comment}
+                />
+            </FormGroup>
+            <FormGroup>
+                <TextInput inline labelText="Icon" bind:value={form.icon} />
+            </FormGroup>
+            <FormGroup>
+                <TextInput inline labelText="Exec" bind:value={form.exec} />
+            </FormGroup>
+            <FormGroup legendText="Terminal">
+                <Toggle bind:toggled={form.terminal}>
+                    <span slot="labelA">False</span>
+                    <span slot="labelB">True</span>
+                </Toggle>
+            </FormGroup>
             <FormGroup legendText="Encoding">
                 <RadioButtonGroup name="Encoding" selected={form.encoding.kind}>
                     <RadioButton
@@ -66,8 +122,10 @@
                         inline
                         labelText="Other Value"
                         on:input={(e) => {
-                            //@ts-ignore
-                            const value = e.target.value;
+                            const value = e.detail;
+                            if (typeof value !== "string") {
+                                throw Error("Invalid Option input");
+                            }
                             form = {
                                 ...form,
                                 encoding: {
@@ -80,19 +138,25 @@
                 {/if}
             </FormGroup>
             <FormGroup>
-                <Select id="select-1" labelText="Select menu">
+                <Select
+                    id="select-1"
+                    labelText="Application Type"
+                    selected={form.appType}
+                >
                     <SelectItem
-                        disabled
-                        hidden
-                        value="placeholder-item"
-                        text="Choose an option"
+                        value={APP_TYPE.Application}
+                        text={APP_TYPE.Application}
                     />
-                    <SelectItem value="option-1" text="Option 1" />
-                    <SelectItem value="option-2" text="Option 2" />
-                    <SelectItem value="option-3" text="Option 3" />
+                    <SelectItem value={APP_TYPE.Link} text={APP_TYPE.Link} />
+                    <SelectItem
+                        value={APP_TYPE.Directory}
+                        text={APP_TYPE.Directory}
+                    />
                 </Select>
             </FormGroup>
-            <Button type="submit">Submit</Button>
+            <AlignRight>
+                <Button type="submit">Submit</Button>
+            </AlignRight>
         </Form>
     </svelte:fragment>
 </PrimaryLayout>

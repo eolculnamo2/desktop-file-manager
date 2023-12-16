@@ -1,3 +1,5 @@
+use std::path::{Path, PathBuf};
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -61,10 +63,11 @@ pub struct AppEntry {
     pub exec: String,
     pub terminal: bool,
     pub categories: Vec<String>,
+    pub absolute_path: PathBuf,
 }
 
 impl AppEntry {
-    pub fn new() -> Self {
+    pub fn new(absolute_path: PathBuf) -> Self {
         Self {
             app_type: AppType::Application,
             encoding: Encoding::UTF8,
@@ -74,6 +77,7 @@ impl AppEntry {
             exec: String::new(),
             terminal: false,
             categories: vec![],
+            absolute_path,
         }
     }
 }
