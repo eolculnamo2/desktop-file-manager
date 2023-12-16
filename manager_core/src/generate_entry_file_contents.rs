@@ -41,9 +41,11 @@ pub fn generate_map_contents_from_entry(entry: &AppEntry) -> HashMap<&str, Strin
         content.insert("Icon", format!("Icon={}", icon));
     }
     content.insert("Exec", format!("Exec={}", entry.exec));
-    content.insert(
-        "Categories",
-        format!("Categories={:?}", entry.categories.join(",")),
-    );
+    if entry.categories.len() > 0 {
+        content.insert(
+            "Categories",
+            format!("Categories={};", &entry.categories.join(";").as_str()),
+        );
+    }
     content
 }

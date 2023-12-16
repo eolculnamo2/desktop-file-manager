@@ -33,7 +33,7 @@ fn get_property_from_text_line(line: &str) -> Option<EntryTypes> {
             return Some(match kind {
                 "Type" => EntryTypes::AppTypeEntry(AppType::from(value.to_string())),
                 // TODO handle generic name better
-                "Name" | "GenericName" => EntryTypes::Name(value.to_string()),
+                "Name" => EntryTypes::Name(value.to_string()),
                 "Comment" => EntryTypes::Comment(value.to_string()),
                 "Icon" => EntryTypes::Icon(value.to_string()),
                 "Exec" => EntryTypes::Exec(value.to_string()),

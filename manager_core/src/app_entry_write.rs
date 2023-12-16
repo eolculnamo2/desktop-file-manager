@@ -24,9 +24,9 @@ pub fn update_entry(entry: AppEntry) -> Result<(), io::Error> {
         .collect();
 
     // need to test this will before replacing it  with live files
-    let test_file = PathBuf::from("/home/rob/test.desktop");
-    fs::write(test_file, new_file_str)?;
-    // fs::write(entry.absolute_path, new_file_str)?;
+    // let test_file = PathBuf::from("/home/rob/test.desktop");
+    // fs::write(test_file, new_file_str)?;
+    fs::write(entry.absolute_path, new_file_str)?;
     Ok(())
 }
 
