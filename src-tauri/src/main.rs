@@ -1,22 +1,28 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::sync::Arc;
+use std::{sync::Arc, time::Instant};
 
 use manager_core::{app_entry::AppEntry, app_entry_write, app_finder};
-use tauri::{Manager, Window};
+use tauri::Manager;
 
 const EMIT_FAILED: &'static str = "Emit failed";
 
 // this is how the front end will ask for information
 #[tauri::command]
 async fn get_shared_apps(_app: tauri::AppHandle) -> app_finder::Result<Vec<AppEntry>> {
-    app_finder::list_shared_apps()
+    let i = Instant::now();
+    let apps = app_finder::list_shared_apps();
+    println!("Shared elapsed {}", i.elapsed().as_nanos());
+    apps
 }
 
 #[tauri::command]
 async fn get_user_apps(_app: tauri::AppHandle) -> app_finder::Result<Vec<AppEntry>> {
-    app_finder::list_user_apps()
+    let i = Instant::now();
+    let apps = app_finder::list_user_apps();
+    println!("User elapsed {}", i.elapsed().as_nanos());
+    apps
 }
 fn main() {
     tauri::Builder::default()
