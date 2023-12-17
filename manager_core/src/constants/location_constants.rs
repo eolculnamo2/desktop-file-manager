@@ -2,9 +2,11 @@ use std::path::PathBuf;
 
 // All users on system share apps here
 const SHARED_APPS: &'static str = "/usr/share/applications";
+pub const SHARED_TYPE: &'static str = "shared";
 
 // Only current user has apps listed here
 const USER_APPS: &'static str = "~/.local/share/applications";
+pub const USER_TYPE: &'static str = "local";
 
 pub fn get_user_app() -> PathBuf {
     expanduser::expanduser(USER_APPS).unwrap()

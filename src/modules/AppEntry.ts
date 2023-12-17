@@ -11,6 +11,12 @@ export const ENCODING = {
     },
 } as const;
 
+export const APP_VISIBILITY = {
+    LOCAL: 'local',
+    SHARED: 'shared',
+} as const;
+
+export type AppVisibility = typeof APP_VISIBILITY[keyof typeof APP_VISIBILITY];
 export type AppType = typeof APP_TYPE[keyof typeof APP_TYPE];
 export type Encoding = { kind: 'UTF8' } | { kind: 'Other', value: string };
 
@@ -28,13 +34,18 @@ export type AppEntryResponse = {
 export class AppEntry {
     appType: AppType = APP_TYPE.Application;
     encoding: Encoding = { kind: 'UTF8' };
-    name: string = "Unnamed";
+    name: string = "";
     comment: Nullish<string>;
     icon: Nullish<string>;
-    exec: string = "No command";
+    exec: string = "";
     terminal: boolean = false;
     categories: string[] = [];
-    absolutePath: string = "invalid";
+
+    // its a little messy, but i'm using this as
+    // local or shared value on create for now
+    // Adding type to make this more obvious until
+    // cleanup is done
+    absolutePath: string | AppVisibility = "";
 
     static toResponse(entry: AppEntry): AppEntryResponse {
         return {

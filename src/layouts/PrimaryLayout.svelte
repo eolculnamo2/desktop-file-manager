@@ -3,7 +3,6 @@
         Header,
         HeaderNav,
         HeaderNavItem,
-        HeaderNavMenu,
         SkipToContent,
         Content,
         Grid,
@@ -28,7 +27,9 @@
                 text="Home"
             />
         {/if}
-        <!-- <HeaderNavItem href="/" text="Link 2" /> -->
+        <HeaderNavItem text="Logs" />
+        <HeaderNavItem text="Help" />
+        <HeaderNavItem text="About" />
         <!-- <HeaderNavItem href="/" text="Link 3" /> -->
         <!-- <HeaderNavMenu text="Menu"> -->
         <!--     <HeaderNavItem href="/" text="Link 1" /> -->

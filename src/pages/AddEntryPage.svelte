@@ -1,7 +1,12 @@
 <script lang="ts">
     import { open } from "@tauri-apps/api/dialog";
     import PrimaryLayout from "../layouts/PrimaryLayout.svelte";
-    import { ENCODING, AppEntry, APP_TYPE } from "../modules/AppEntry";
+    import {
+        ENCODING,
+        AppEntry,
+        APP_TYPE,
+        APP_VISIBILITY,
+    } from "../modules/AppEntry";
     import {
         Form,
         Button,
@@ -25,21 +30,19 @@
     import { onMount } from "svelte";
     import { loadMyApps, loadShared } from "../store/entries_store";
 
-    // LEFT OFF HERE. NEED TO FIGURE OUT WHERE ICONS
-    // ARE LOCATED FOR SHARED APPS
-    export let entry: AppEntry;
-    let form = structuredClone(entry);
+    let form = new AppEntry();
     let errorMsg: Nullish<string> = null;
     let isLoading = false;
 
     onMount(() => {
         let unlistenOk: Nullish<UnlistenFn>;
         let unlistenErr: Nullish<UnlistenFn>;
-        listen("entry_update_ok", async () => {
+        listen("entry_create_ok", async () => {
             isLoading = true;
-            if (entry.absolutePath.includes(".local")) {
+            if (form.absolutePath == APP_VISIBILITY.LOCAL) {
                 await loadMyApps(true);
-            } else {
+            }
+            if (form.absolutePath == APP_VISIBILITY.SHARED) {
                 await loadShared(true);
             }
             isLoading = false;
@@ -47,7 +50,7 @@
         }).then((ul) => {
             unlistenOk = ul;
         });
-        listen("entry_update_err", (msg) => {
+        listen("entry_create_err", (msg) => {
             errorMsg = msg.payload as string;
         }).then((ul) => (unlistenErr = ul));
         return () => {
@@ -55,25 +58,13 @@
             unlistenErr?.();
         };
     });
-    async function openFile() {
-        await open({
-            directory: false,
-            defaultPath: entry.absolutePath,
-        });
-    }
-    // TODO make location for this configurable
-    // Want to also benchmark rayon for reading desktop files
     function getIconSrc(icon: Nullish<string>) {
         if (!icon) {
             return "/tauri.svg";
         } else if (icon.startsWith("/")) {
-            // assume absolute path
             return convertFileSrc(icon);
         } else {
             return convertFileSrc(
-                // this really isn't acceptable as it is.
-                // Need this to be able to more intelligently infer location
-                // https://askubuntu.com/questions/153575/where-does-gnome-nautilus-store-directory-icons
                 `/usr/share/icons/hicolor/symbolic/apps/${icon}-symbolic.svg`,
             );
         }
@@ -92,19 +83,15 @@
                     >
                 </div>
                 <Column>
-                    <h1 class="title">Edit {entry.name}</h1>
+                    <h1 class="title">Create App Entry</h1>
                     <div class="row">
                         <img
-                            src={getIconSrc(entry.icon)}
+                            src={getIconSrc(form.icon)}
                             class="logo tauri"
-                            alt={entry.icon ? entry.name : "Tauri Icon"}
+                            alt={form.icon ? form.name : "Tauri Icon"}
                         />
                     </div>
                 </Column>
-                <div>
-                    <Button kind="tertiary" on:click={openFile}>Open Raw</Button
-                    >
-                </div>
             </Row>
         </Grid>
 
@@ -127,11 +114,27 @@
             on:submit={(e) => {
                 errorMsg = null;
                 e.preventDefault();
-                emit("entry_update", AppEntry.toResponse(form));
+                emit("entry_create", AppEntry.toResponse(form));
             }}
         >
             <FormGroup>
                 <TextInput inline labelText="App Name" bind:value={form.name} />
+            </FormGroup>
+            <FormGroup>
+                <RadioButtonGroup
+                    legendText="My App or Shared?"
+                    name="appScope"
+                    bind:selected={form.absolutePath}
+                >
+                    <RadioButton
+                        labelText="My App"
+                        value={APP_VISIBILITY.LOCAL}
+                    />
+                    <RadioButton
+                        labelText="Shared App"
+                        value={APP_VISIBILITY.SHARED}
+                    />
+                </RadioButtonGroup>
             </FormGroup>
             <FormGroup>
                 <TextInput

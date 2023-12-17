@@ -29,7 +29,31 @@ fn main() {
         .setup(|app| {
             let main_window = Arc::new(app.get_window("main").unwrap());
 
-            //  respond to front end with errors
+            let main_window_clone = main_window.clone();
+            main_window.listen("entry_create", move |event| {
+                let payload = event.payload();
+                if payload.is_some_and(|p| {
+                    let entry: AppEntry = serde_json::from_str(p).expect("Invalid payload");
+                    if let Err(e) = app_entry_write::create_entry(entry) {
+                        eprintln!("Failed to create entry {:?}", e);
+                        main_window_clone
+                            .emit("entry_create_err", "IO Error: File may not have saved")
+                            .expect(EMIT_FAILED);
+                        return false;
+                    }
+                    true
+                }) {
+                    main_window_clone
+                        .emit("entry_create_ok", "Done")
+                        .expect(EMIT_FAILED);
+                } else {
+                    eprintln!("No payload");
+                    main_window_clone
+                        .emit("entry_create_err", "Payload required")
+                        .expect(EMIT_FAILED);
+                }
+            });
+
             let main_window_clone = main_window.clone();
             main_window.listen("entry_update", move |event| {
                 let payload = event.payload();
@@ -41,7 +65,8 @@ fn main() {
                     return;
                 }
                 let update_payload = payload.expect("Already dealt with None");
-                let entry: AppEntry = serde_json::from_str(update_payload).expect("derp");
+                let entry: AppEntry =
+                    serde_json::from_str(update_payload).expect("Invalid payload");
                 if let Err(e) = app_entry_write::update_entry(entry) {
                     eprintln!("Failed to update entry {:?}", e);
                     main_window_clone

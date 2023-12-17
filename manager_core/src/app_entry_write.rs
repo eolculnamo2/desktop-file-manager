@@ -1,16 +1,73 @@
-use std::{fs, io};
+use std::{fs, io, path::Path};
 
 use crate::{
     app_entry::AppEntry,
+    constants::location_constants::{get_shared_app, get_user_app, SHARED_TYPE, USER_TYPE},
     generate_entry_file_contents::{
-        generate_map_contents_from_entry, generate_vec_contents_from_entry,
+        generate_header, generate_map_contents_from_entry, generate_vec_contents_from_entry,
     },
 };
 
-pub fn create_entry(entry: AppEntry) -> Result<(), io::Error> {
+#[derive(Debug, Clone)]
+pub enum CreateEntryError {
+    InvalidPathType,
+    MissingPathType,
+    FileAlreadyExists,
+    UnableToVerifyFileAvailable,
+    IoError,
+}
+
+impl From<io::Error> for CreateEntryError {
+    fn from(_: io::Error) -> Self {
+        CreateEntryError::IoError
+    }
+}
+
+fn convert_name_to_desktop_name(entry_name: &str) -> String {
+    let sanitized_name = entry_name.replace(" ", "_").replace('\n', "");
+    if sanitized_name.ends_with(".desktop") {
+        sanitized_name
+    } else {
+        format!("{}.desktop", sanitized_name)
+    }
+}
+
+pub fn create_entry(entry: AppEntry) -> Result<(), CreateEntryError> {
     let file_text_join = generate_vec_contents_from_entry(&entry).join("");
-    let file_text = file_text_join.as_str();
-    fs::write(entry.absolute_path, file_text)?;
+    let file_text_raw = file_text_join.as_str();
+    let file_header = generate_header();
+    let file_text = format!("{}\n{}", file_header, file_text_raw);
+
+    // taking a shortcut and making absolute path be hard coded local or shared for now
+    // will clean up later
+    let path_type = entry
+        .absolute_path
+        .to_str()
+        .ok_or(CreateEntryError::MissingPathType)?;
+
+    let user_path = get_user_app();
+    let absolute_path = if path_type == SHARED_TYPE {
+        Ok(get_shared_app())
+    } else if path_type == USER_TYPE {
+        Ok(user_path.to_str().expect("Unable to get user app path"))
+    } else {
+        Err(CreateEntryError::InvalidPathType)
+    }?;
+
+    let file_name = convert_name_to_desktop_name(&entry.name);
+    let path_with_file_name = format!("{}/{}", absolute_path, file_name);
+
+    let already_exists_result = Path::try_exists(Path::new(&path_with_file_name));
+    if let Err(e) = already_exists_result {
+        eprintln!("Unable to determine if file aleady exists: {:?}", e);
+        return Err(CreateEntryError::UnableToVerifyFileAvailable);
+    } else if let Ok(true) = already_exists_result {
+        eprintln!("File {} already exists", path_with_file_name);
+        return Err(CreateEntryError::FileAlreadyExists);
+    }
+
+    println!("New path is {}", path_with_file_name);
+    fs::write(path_with_file_name, file_text)?;
     Ok(())
 }
 
