@@ -10,6 +10,7 @@
         Row,
         Column,
     } from "carbon-components-svelte";
+    import { PageName, currentPage, goToPage } from "../store/nav_store";
 
     let isSideNavOpen = false;
 </script>
@@ -19,14 +20,21 @@
         <SkipToContent />
     </svelte:fragment>
     <HeaderNav>
-        <HeaderNavItem href="/" text="Link 1" />
-        <HeaderNavItem href="/" text="Link 2" />
-        <HeaderNavItem href="/" text="Link 3" />
-        <HeaderNavMenu text="Menu">
-            <HeaderNavItem href="/" text="Link 1" />
-            <HeaderNavItem href="/" text="Link 2" />
-            <HeaderNavItem href="/" text="Link 3" />
-        </HeaderNavMenu>
+        {#if $currentPage.page !== PageName.INDEX}
+            <HeaderNavItem
+                on:click={() => {
+                    goToPage({ page: PageName.INDEX });
+                }}
+                text="Home"
+            />
+        {/if}
+        <!-- <HeaderNavItem href="/" text="Link 2" /> -->
+        <!-- <HeaderNavItem href="/" text="Link 3" /> -->
+        <!-- <HeaderNavMenu text="Menu"> -->
+        <!--     <HeaderNavItem href="/" text="Link 1" /> -->
+        <!--     <HeaderNavItem href="/" text="Link 2" /> -->
+        <!--     <HeaderNavItem href="/" text="Link 3" /> -->
+        <!-- </HeaderNavMenu> -->
     </HeaderNav>
 </Header>
 

@@ -13,7 +13,7 @@ pub fn generate_header() -> String {
 pub fn generate_vec_contents_from_entry(entry: &AppEntry) -> Vec<String> {
     let mut content: Vec<String> = Vec::new();
     let app_type_str: String = entry.app_type.clone().into();
-    content.push(format!("Application={}\n", app_type_str));
+    content.push(format!("Type={}\n", app_type_str));
     content.push(format!("Name={}\n", entry.name));
     content.push(format!("Generic Name={}\n", entry.name));
     if let Some(comment) = &entry.comment {
@@ -31,7 +31,7 @@ pub fn generate_vec_contents_from_entry(entry: &AppEntry) -> Vec<String> {
 pub fn generate_map_contents_from_entry(entry: &AppEntry) -> HashMap<&str, String> {
     let mut content: HashMap<&str, String> = HashMap::new();
     let app_type_str: String = entry.app_type.clone().into();
-    content.insert("Application", format!("Application={}", app_type_str));
+    content.insert("Type", format!("Type={}", app_type_str));
     content.insert("Name", format!("Name={}", entry.name.clone()));
     // content.insert("Generic Name", entry.name);
     if let Some(comment) = &entry.comment {

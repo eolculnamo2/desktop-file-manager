@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { open } from "@tauri-apps/api/dialog";
     import PrimaryLayout from "../layouts/PrimaryLayout.svelte";
     import { ENCODING, AppEntry, APP_TYPE } from "../modules/AppEntry";
     import {
@@ -14,17 +15,47 @@
         Grid,
         Row,
         Column,
+        ToastNotification,
     } from "carbon-components-svelte";
     import { PageName, goToPage } from "../store/nav_store";
     import { convertFileSrc } from "@tauri-apps/api/tauri";
     import AlignRight from "../lib/AlignRight.svelte";
-    import { emit } from "@tauri-apps/api/event";
+    import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
+    import { onMount } from "svelte";
 
     // LEFT OFF HERE. NEED TO FIGURE OUT WHERE ICONS
     // ARE LOCATED FOR SHARED APPS
     export let entry: AppEntry;
     let form = structuredClone(entry);
+    let errorMsg: Nullish<string> = null;
 
+    onMount(() => {
+        let unlistenOk: Nullish<UnlistenFn>;
+        let unlistenErr: Nullish<UnlistenFn>;
+        listen("entry_update_ok", () => {
+            goToPage({ page: PageName.INDEX });
+        }).then((ul) => (unlistenOk = ul));
+        listen("entry_update_err", (msg) => {
+            errorMsg = msg.payload as string;
+        }).then((ul) => (unlistenErr = ul));
+        return () => {
+            console.log("Clean up");
+            unlistenOk?.();
+            unlistenErr?.();
+        };
+    });
+    async function openFile(location: string) {
+        await open({
+            directory: false,
+            defaultPath: entry.absolutePath,
+            // filters: [
+            //     {
+            //         name: "Image",
+            //         extensions: ["desktop"],
+            //     },
+            // ],
+        });
+    }
     // TODO make location for this configurable
     // Want to also benchmark rayon for reading desktop files
     function getIconSrc(icon: Nullish<string>) {
@@ -65,13 +96,33 @@
                         />
                     </div>
                 </Column>
+                <div>
+                    <Button
+                        kind="tertiary"
+                        on:click={() =>
+                            openFile(convertFileSrc(entry.absolutePath))}
+                        >Open Raw</Button
+                    >
+                </div>
             </Row>
         </Grid>
+
+        {#if errorMsg}
+            <ToastNotification
+                fullWidth
+                lowContrast
+                title="Error"
+                subtitle={errorMsg}
+            />
+            <br />
+        {/if}
     </svelte:fragment>
     <svelte:fragment slot="body">
         <Form
             on:submit={(e) => {
+                errorMsg = null;
                 e.preventDefault();
+                alert(JSON.stringify(AppEntry.toResponse(form), null, 3));
                 emit("entry_update", AppEntry.toResponse(form));
             }}
         >
