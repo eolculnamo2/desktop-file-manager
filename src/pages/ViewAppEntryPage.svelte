@@ -16,25 +16,37 @@
         Row,
         Column,
         ToastNotification,
+        ProgressBar,
     } from "carbon-components-svelte";
     import { PageName, goToPage } from "../store/nav_store";
     import { convertFileSrc } from "@tauri-apps/api/tauri";
     import AlignRight from "../lib/AlignRight.svelte";
     import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
     import { onMount } from "svelte";
+    import { loadMyApps, loadShared } from "../store/entries_store";
 
     // LEFT OFF HERE. NEED TO FIGURE OUT WHERE ICONS
     // ARE LOCATED FOR SHARED APPS
     export let entry: AppEntry;
     let form = structuredClone(entry);
     let errorMsg: Nullish<string> = null;
+    let isLoading = false;
 
     onMount(() => {
         let unlistenOk: Nullish<UnlistenFn>;
         let unlistenErr: Nullish<UnlistenFn>;
-        listen("entry_update_ok", () => {
+        listen("entry_update_ok", async () => {
+            isLoading = true;
+            if (entry.absolutePath.includes(".local")) {
+                await loadMyApps(true);
+            } else {
+                await loadShared(true);
+            }
+            isLoading = false;
             goToPage({ page: PageName.INDEX });
-        }).then((ul) => (unlistenOk = ul));
+        }).then((ul) => {
+            unlistenOk = ul;
+        });
         listen("entry_update_err", (msg) => {
             errorMsg = msg.payload as string;
         }).then((ul) => (unlistenErr = ul));
@@ -107,6 +119,10 @@
             </Row>
         </Grid>
 
+        {#if isLoading}
+            <ProgressBar helperText="Loading..." />
+        {/if}
+
         {#if errorMsg}
             <ToastNotification
                 fullWidth
@@ -122,7 +138,6 @@
             on:submit={(e) => {
                 errorMsg = null;
                 e.preventDefault();
-                alert(JSON.stringify(AppEntry.toResponse(form), null, 3));
                 emit("entry_update", AppEntry.toResponse(form));
             }}
         >
@@ -206,7 +221,7 @@
                 </Select>
             </FormGroup>
             <AlignRight>
-                <Button type="submit">Submit</Button>
+                <Button type="submit" disabled={isLoading}>Submit</Button>
             </AlignRight>
         </Form>
     </svelte:fragment>
