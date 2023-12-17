@@ -1,6 +1,6 @@
 use std::{
     fs::{read_dir, ReadDir},
-    sync::{Arc, Mutex},
+    sync::Mutex,
 };
 
 use rayon::iter::{ParallelBridge, ParallelIterator};
@@ -39,23 +39,28 @@ pub fn list_user_apps() -> Result<Vec<AppEntry>> {
 }
 
 fn list_apps(dir: ReadDir) -> Result<Vec<AppEntry>> {
-    let apps: Arc<Mutex<Vec<AppEntry>>> = Arc::new(Mutex::new(Vec::new()));
+    let apps: Mutex<Vec<AppEntry>> = Mutex::new(Vec::new());
+    let err: Mutex<Option<ListAppError>> = Mutex::new(None);
     dir.par_bridge().for_each(|dir_entry_res| {
         if let Ok(dir_entry) = dir_entry_res {
             let path = dir_entry.path();
             if path.to_str().expect("Invalid path").ends_with(".desktop") {
                 let result = desktop_file_parser::get_entry_from_file(path);
-                // if let Err(ref e) = result {
-                //     if e != &DesktopFileParseError::InvalidHeader {
-                //         return Err(ListAppError::ParseAppError(e.clone()));
-                //     }
-                // }
+                if let Err(ref e) = result {
+                    if e != &DesktopFileParseError::InvalidHeader {
+                        *err.lock().expect("Poisoned lock") =
+                            Some(ListAppError::ParseAppError(e.clone()));
+                    }
+                }
                 if let Ok(app) = result {
                     apps.lock().expect("Lock poisoned").push(app);
                 }
             }
         };
     });
+    if let Some(e) = err.lock().expect("Lock poisoned").as_ref() {
+        return Err(e.clone());
+    }
     let mut apps = apps.lock().expect("lock poisoined");
     apps.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
     Ok(apps.to_vec())
