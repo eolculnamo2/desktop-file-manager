@@ -12,5 +12,5 @@ const _logs = writable<Log[]>([]);
 export const logs = readonly(_logs);
 
 export function handle_new_log(l: Log) {
-    _logs.update(prev => [...prev, l]);
+    _logs.update(prev => [l, ...prev]);
 }

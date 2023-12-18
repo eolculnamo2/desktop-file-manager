@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { AppEntry } from "../../modules/AppEntry";
+    import { AppEntry } from "../modules/AppEntry";
     export let entries: AppEntry[];
     export let onEntryClick: Nullish<(entry: AppEntry, index: number) => void> =
         null;

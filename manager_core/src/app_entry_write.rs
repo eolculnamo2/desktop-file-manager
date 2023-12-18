@@ -19,7 +19,8 @@ pub enum CreateEntryError {
 }
 
 impl From<io::Error> for CreateEntryError {
-    fn from(_: io::Error) -> Self {
+    fn from(e: io::Error) -> Self {
+        Log::error(format!("Failed to save entry: {}", e)).send_log();
         CreateEntryError::IoError
     }
 }
@@ -61,13 +62,18 @@ pub fn create_entry(entry: AppEntry) -> Result<(), CreateEntryError> {
 
     let already_exists_result = Path::try_exists(Path::new(&path_with_file_name));
     if let Err(e) = already_exists_result {
-        let error_msg = format!("Unable to determine if file aleady exists: [[{:?}]]", e);
-        Log::error(error_msg).send_log();
+        Log::error(format!(
+            "Unable to determine if file aleady exists: [[{:?}]]",
+            e
+        ))
+        .send_log();
         return Err(CreateEntryError::UnableToVerifyFileAvailable);
     } else if let Ok(true) = already_exists_result {
-        Log::error(format!("File [[{}]] already exists", path_with_file_name)).send_log();
+        Log::error(format!("File [[ {} ]] already exists", path_with_file_name)).send_log();
         return Err(CreateEntryError::FileAlreadyExists);
     }
+
+    Log::info(format!("Entry created: {}", path_with_file_name)).send_log();
     fs::write(path_with_file_name, file_text)?;
     Ok(())
 }
@@ -111,6 +117,12 @@ pub fn update_entry(entry: AppEntry) -> Result<(), io::Error> {
     // need to test this will before replacing it  with live files
     // let test_file = PathBuf::from("/home/rob/test.desktop");
     // fs::write(test_file, new_file_str)?;
+
+    Log::info(format!(
+        "Entry updated: {}",
+        &entry.absolute_path.to_str().expect("No aboslute path")
+    ))
+    .send_log();
     fs::write(
         entry.absolute_path,
         format!("{}\n{}", new_file_str, new_entries),

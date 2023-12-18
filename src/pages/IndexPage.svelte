@@ -1,5 +1,5 @@
 <script lang="ts">
-    import AppEntryList from "../lib/AppEntryList/AppEntryList.svelte";
+    import AppEntryList from "../lib/AppEntryList.svelte";
     import { onMount } from "svelte";
     import PrimaryLayout from "../layouts/PrimaryLayout.svelte";
     import { PageName, goToPage } from "../store/nav_store";
