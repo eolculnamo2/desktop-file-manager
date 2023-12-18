@@ -1,4 +1,5 @@
 use std::{
+    cell::OnceCell,
     sync::{mpsc::Sender, Mutex},
     time::SystemTime,
 };
@@ -52,8 +53,8 @@ impl Log {
             LogLevel::Warn => println!("WARN: {}", &self.message),
             LogLevel::Error => println!("ERROR: {}", &self.message),
         }
-        if let Some(sender) = &LOG_CHANNEL.lock().expect(LOG_CHANNEL_POISON).sender {
-            if let Err(e) = sender.send(self) {
+        if let Some(logger_channel) = &LOG_CHANNEL.lock().expect(LOG_CHANNEL_POISON).get() {
+            if let Err(e) = logger_channel.sender.send(self) {
                 eprintln!("Failed to send log {}", e);
             }
         } else {
@@ -62,28 +63,28 @@ impl Log {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct LoggerChannel {
-    pub sender: Option<Sender<Log>>,
+    pub sender: Sender<Log>,
 }
 
 impl LoggerChannel {
-    const fn new() -> Self {
-        Self { sender: None }
+    fn new(sender: Sender<Log>) -> Self {
+        Self { sender }
     }
 }
 
-pub static LOG_CHANNEL: Mutex<LoggerChannel> = Mutex::new(LoggerChannel::new());
+pub static LOG_CHANNEL: Mutex<OnceCell<LoggerChannel>> = Mutex::new(OnceCell::new());
 pub const LOG_CHANNEL_POISON: &'static str = "Log channel poisoned";
 
 pub fn init_channel(sender: Sender<Log>) {
-    if LOG_CHANNEL
+    let log_init_result = LOG_CHANNEL
         .lock()
         .expect(LOG_CHANNEL_POISON)
-        .sender
-        .is_some()
-    {
+        .set(LoggerChannel::new(sender));
+
+    if let Err(_) = log_init_result {
         println!("Log channel already started");
         return;
     }
-    LOG_CHANNEL.lock().expect(LOG_CHANNEL_POISON).sender = Some(sender);
 }
