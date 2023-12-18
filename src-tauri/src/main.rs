@@ -4,7 +4,7 @@
 use std::{
     sync::{mpsc::channel, Arc},
     thread,
-    time::{Duration, Instant},
+    time::Instant,
 };
 
 use manager_core::{app_entry::AppEntry, app_entry_write, app_finder, logger};
@@ -17,7 +17,11 @@ const EMIT_FAILED: &'static str = "Emit failed";
 async fn get_shared_apps(_app: tauri::AppHandle) -> app_finder::Result<Vec<AppEntry>> {
     let i = Instant::now();
     let apps = app_finder::list_shared_apps();
-    println!("Shared elapsed {}", i.elapsed().as_nanos());
+    logger::Log::trace(format!(
+        "Time to fetch shared apps time in nanos {}",
+        i.elapsed().as_nanos()
+    ))
+    .send_log();
     apps
 }
 
@@ -25,7 +29,11 @@ async fn get_shared_apps(_app: tauri::AppHandle) -> app_finder::Result<Vec<AppEn
 async fn get_user_apps(_app: tauri::AppHandle) -> app_finder::Result<Vec<AppEntry>> {
     let i = Instant::now();
     let apps = app_finder::list_user_apps();
-    println!("User elapsed {}", i.elapsed().as_nanos());
+    logger::Log::trace(format!(
+        "Time to fetch user apps time in nanos {}",
+        i.elapsed().as_nanos()
+    ))
+    .send_log();
     apps
 }
 
@@ -43,7 +51,6 @@ fn main() {
                         eprintln!("Receiver failed! {}", e);
                     }
                     Ok(payload) => {
-                        println!("payload {}", &payload.message);
                         main_window_clone
                             .emit("log", payload)
                             .expect("failed to send log");

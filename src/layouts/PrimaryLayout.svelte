@@ -35,14 +35,22 @@
                 text="Logs"
             />
         {/if}
-        <HeaderNavItem text="Help" />
-        <HeaderNavItem text="About" />
-        <!-- <HeaderNavItem href="/" text="Link 3" /> -->
-        <!-- <HeaderNavMenu text="Menu"> -->
-        <!--     <HeaderNavItem href="/" text="Link 1" /> -->
-        <!--     <HeaderNavItem href="/" text="Link 2" /> -->
-        <!--     <HeaderNavItem href="/" text="Link 3" /> -->
-        <!-- </HeaderNavMenu> -->
+        {#if $currentPage.page !== PageName.HELP}
+            <HeaderNavItem
+                on:click={() => {
+                    goToPage({ page: PageName.HELP });
+                }}
+                text="Help"
+            />
+        {/if}
+        {#if $currentPage.page !== PageName.ABOUT}
+            <HeaderNavItem
+                on:click={() => {
+                    goToPage({ page: PageName.ABOUT });
+                }}
+                text="About"
+            />
+        {/if}
     </HeaderNav>
 </Header>
 

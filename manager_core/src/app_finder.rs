@@ -30,11 +30,13 @@ pub type Result<T> = std::result::Result<T, ListAppError>;
 
 /// Get all shared apps
 pub fn list_shared_apps() -> Result<Vec<AppEntry>> {
+    Log::info("Fetching shared apps".to_string()).send_log();
     let dir = read_dir(get_shared_app())?;
     list_apps(dir)
 }
 /// Get all user apps
 pub fn list_user_apps() -> Result<Vec<AppEntry>> {
+    Log::info("Fetching user apps".to_string()).send_log();
     let dir = read_dir(get_user_app())?;
     list_apps(dir)
 }
@@ -42,8 +44,6 @@ pub fn list_user_apps() -> Result<Vec<AppEntry>> {
 fn list_apps(dir: ReadDir) -> Result<Vec<AppEntry>> {
     let apps: Mutex<Vec<AppEntry>> = Mutex::new(Vec::new());
     let err: Mutex<Option<ListAppError>> = Mutex::new(None);
-
-    Log::info("Fetching apps".to_string()).send_log();
 
     dir.par_bridge().for_each(|dir_entry_res| {
         if let Ok(dir_entry) = dir_entry_res {

@@ -26,6 +26,11 @@
                 <Row>
                     <Checkbox
                         bind:group={logsToDisplay}
+                        labelText="Trace"
+                        value="trace"
+                    />
+                    <Checkbox
+                        bind:group={logsToDisplay}
                         labelText="Info"
                         value="info"
                     />
@@ -82,6 +87,9 @@
     }
     h3 {
         margin: 1rem;
+    }
+    .trace {
+        color: #999;
     }
     .info {
         color: #c4c4c4;

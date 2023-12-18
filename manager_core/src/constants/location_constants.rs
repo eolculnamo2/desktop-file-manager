@@ -12,10 +12,10 @@ pub fn get_user_app() -> PathBuf {
     expanduser::expanduser(USER_APPS).unwrap()
 }
 
-pub fn get_route_from_user_path(appended_path: &str) -> PathBuf {
-    let app_dir = get_user_app();
-    app_dir.join(appended_path)
-}
+// pub fn get_route_from_user_path(appended_path: &str) -> PathBuf {
+//     let app_dir = get_user_app();
+//     app_dir.join(appended_path)
+// }
 
 // this is just here for consistency since user_app is computed on the fly
 pub fn get_shared_app() -> &'static str {

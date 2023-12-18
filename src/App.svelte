@@ -7,6 +7,8 @@
     import { listen } from "@tauri-apps/api/event";
     import { handle_new_log, type Log } from "./store/log_store";
     import LogsPage from "./pages/LogsPage.svelte";
+    import AboutPage from "./pages/AboutPage.svelte";
+    import HelpPage from "./pages/HelpPage.svelte";
 
     onMount(() => {
         listen("log", (message) => {
@@ -24,4 +26,8 @@
     <AddEntryPage />
 {:else if $currentPage.page === PageName.LOGS}
     <LogsPage />
+{:else if $currentPage.page === PageName.ABOUT}
+    <AboutPage />
+{:else if $currentPage.page === PageName.HELP}
+    <HelpPage />
 {/if}

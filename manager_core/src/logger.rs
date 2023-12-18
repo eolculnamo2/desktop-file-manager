@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum LogLevel {
+    Trace,
     Info,
     Warn,
     Error,
@@ -28,6 +29,10 @@ impl Log {
         }
     }
 
+    pub fn trace(message: String) -> Self {
+        Self::new(message, LogLevel::Trace)
+    }
+
     pub fn info(message: String) -> Self {
         Self::new(message, LogLevel::Info)
     }
@@ -42,6 +47,7 @@ impl Log {
 
     pub fn send_log(self) {
         match self.level {
+            LogLevel::Trace => println!("TRACE: {}", &self.message),
             LogLevel::Info => println!("INFO: {}", &self.message),
             LogLevel::Warn => println!("WARN: {}", &self.message),
             LogLevel::Error => println!("ERROR: {}", &self.message),
