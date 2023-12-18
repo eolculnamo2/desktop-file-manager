@@ -6,6 +6,7 @@ use crate::{
     generate_entry_file_contents::{
         generate_header, generate_map_contents_from_entry, generate_vec_contents_from_entry,
     },
+    logger::Log,
 };
 
 #[derive(Debug, Clone)]
@@ -51,6 +52,7 @@ pub fn create_entry(entry: AppEntry) -> Result<(), CreateEntryError> {
     } else if path_type == USER_TYPE {
         Ok(user_path.to_str().expect("Unable to get user app path"))
     } else {
+        Log::error(format!("Invalid file type on save [[{}]]", path_type)).send_log();
         Err(CreateEntryError::InvalidPathType)
     }?;
 
@@ -59,14 +61,13 @@ pub fn create_entry(entry: AppEntry) -> Result<(), CreateEntryError> {
 
     let already_exists_result = Path::try_exists(Path::new(&path_with_file_name));
     if let Err(e) = already_exists_result {
-        eprintln!("Unable to determine if file aleady exists: {:?}", e);
+        let error_msg = format!("Unable to determine if file aleady exists: [[{:?}]]", e);
+        Log::error(error_msg).send_log();
         return Err(CreateEntryError::UnableToVerifyFileAvailable);
     } else if let Ok(true) = already_exists_result {
-        eprintln!("File {} already exists", path_with_file_name);
+        Log::error(format!("File [[{}]] already exists", path_with_file_name)).send_log();
         return Err(CreateEntryError::FileAlreadyExists);
     }
-
-    println!("New path is {}", path_with_file_name);
     fs::write(path_with_file_name, file_text)?;
     Ok(())
 }

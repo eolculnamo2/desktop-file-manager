@@ -1,8 +1,19 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import AddEntryPage from "./pages/AddEntryPage.svelte";
     import IndexPage from "./pages/IndexPage.svelte";
     import ViewAppEntryPage from "./pages/ViewAppEntryPage.svelte";
     import { PageName, currentPage } from "./store/nav_store";
+    import { listen } from "@tauri-apps/api/event";
+    import { handle_new_log, type Log } from "./store/log_store";
+    import LogsPage from "./pages/LogsPage.svelte";
+
+    onMount(() => {
+        listen("log", (message) => {
+            const l = message.payload as Log;
+            handle_new_log(l);
+        });
+    });
 </script>
 
 {#if $currentPage.page === PageName.INDEX}
@@ -11,4 +22,6 @@
     <ViewAppEntryPage entry={$currentPage.entry} />
 {:else if $currentPage.page === PageName.ADD_APP_ENTRY}
     <AddEntryPage />
+{:else if $currentPage.page === PageName.LOGS}
+    <LogsPage />
 {/if}

@@ -5,12 +5,14 @@ export enum PageName {
     INDEX,
     VIEW_APP_ENTRY,
     ADD_APP_ENTRY,
+    LOGS,
 }
 
 export type Pages =
     | { page: PageName.INDEX }
     | { page: PageName.VIEW_APP_ENTRY, entry: AppEntry }
     | { page: PageName.ADD_APP_ENTRY }
+    | { page: PageName.LOGS }
 
 const _currentPage = writable<Pages>({ page: PageName.INDEX });
 export const currentPage = readonly(_currentPage);

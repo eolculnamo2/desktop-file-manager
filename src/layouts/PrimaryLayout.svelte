@@ -27,7 +27,14 @@
                 text="Home"
             />
         {/if}
-        <HeaderNavItem text="Logs" />
+        {#if $currentPage.page !== PageName.LOGS}
+            <HeaderNavItem
+                on:click={() => {
+                    goToPage({ page: PageName.LOGS });
+                }}
+                text="Logs"
+            />
+        {/if}
         <HeaderNavItem text="Help" />
         <HeaderNavItem text="About" />
         <!-- <HeaderNavItem href="/" text="Link 3" /> -->

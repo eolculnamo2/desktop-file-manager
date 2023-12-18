@@ -11,6 +11,7 @@ use crate::{
     app_entry::AppEntry,
     constants::location_constants::{get_shared_app, get_user_app},
     desktop_file_parser::{self, DesktopFileParseError},
+    logger::Log,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -41,6 +42,9 @@ pub fn list_user_apps() -> Result<Vec<AppEntry>> {
 fn list_apps(dir: ReadDir) -> Result<Vec<AppEntry>> {
     let apps: Mutex<Vec<AppEntry>> = Mutex::new(Vec::new());
     let err: Mutex<Option<ListAppError>> = Mutex::new(None);
+
+    Log::info("Fetching apps".to_string()).send_log();
+
     dir.par_bridge().for_each(|dir_entry_res| {
         if let Ok(dir_entry) = dir_entry_res {
             let path = dir_entry.path();

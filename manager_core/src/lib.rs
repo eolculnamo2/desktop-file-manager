@@ -6,4 +6,4 @@ pub mod app_finder;
 mod constants;
 mod desktop_file_parser;
 pub mod generate_entry_file_contents;
-
+pub mod logger;
