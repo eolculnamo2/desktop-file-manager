@@ -11,3 +11,4 @@ TODO:
 4. Add fallback when unable to find icon
 5. Header check isn't always working because of comments and potentially empty top lines
 6. Good keyboard navigation -- would love to make Vimium work or something
+7. Delete .desktop file

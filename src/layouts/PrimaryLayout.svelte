@@ -19,38 +19,34 @@
         <SkipToContent />
     </svelte:fragment>
     <HeaderNav>
-        {#if $currentPage.page !== PageName.INDEX}
-            <HeaderNavItem
-                on:click={() => {
-                    goToPage({ page: PageName.INDEX });
-                }}
-                text="Home"
-            />
-        {/if}
-        {#if $currentPage.page !== PageName.LOGS}
-            <HeaderNavItem
-                on:click={() => {
-                    goToPage({ page: PageName.LOGS });
-                }}
-                text="Logs"
-            />
-        {/if}
-        {#if $currentPage.page !== PageName.HELP}
-            <HeaderNavItem
-                on:click={() => {
-                    goToPage({ page: PageName.HELP });
-                }}
-                text="Help"
-            />
-        {/if}
-        {#if $currentPage.page !== PageName.ABOUT}
-            <HeaderNavItem
-                on:click={() => {
-                    goToPage({ page: PageName.ABOUT });
-                }}
-                text="About"
-            />
-        {/if}
+        <HeaderNavItem
+            isSelected={$currentPage.page === PageName.INDEX}
+            on:click={() => {
+                goToPage({ page: PageName.INDEX });
+            }}
+            text="Home"
+        />
+        <HeaderNavItem
+            isSelected={$currentPage.page === PageName.LOGS}
+            on:click={() => {
+                goToPage({ page: PageName.LOGS });
+            }}
+            text="Logs"
+        />
+        <HeaderNavItem
+            isSelected={$currentPage.page === PageName.HELP}
+            on:click={() => {
+                goToPage({ page: PageName.HELP });
+            }}
+            text="Help"
+        />
+        <HeaderNavItem
+            isSelected={$currentPage.page === PageName.ABOUT}
+            on:click={() => {
+                goToPage({ page: PageName.ABOUT });
+            }}
+            text="About"
+        />
     </HeaderNav>
 </Header>
 
