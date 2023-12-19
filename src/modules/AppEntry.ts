@@ -19,6 +19,10 @@ export const APP_VISIBILITY = {
 export type AppVisibility = typeof APP_VISIBILITY[keyof typeof APP_VISIBILITY];
 export type AppType = typeof APP_TYPE[keyof typeof APP_TYPE];
 export type Encoding = { kind: 'UTF8' } | { kind: 'Other', value: string };
+export type AllApps = {
+    userApps: AppEntryResponse[],
+    sharedApps: AppEntryResponse[],
+}
 
 export type AppEntryResponse = {
     appType: AppType;

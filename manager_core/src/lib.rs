@@ -3,7 +3,7 @@
 pub mod app_entry;
 pub mod app_entry_write;
 pub mod app_finder;
-mod constants;
+pub mod constants;
 mod desktop_file_parser;
 pub mod generate_entry_file_contents;
 pub mod logger;

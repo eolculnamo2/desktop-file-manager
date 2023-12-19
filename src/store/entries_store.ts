@@ -1,5 +1,5 @@
 import { get, readonly, writable } from "svelte/store";
-import { AppEntry, type AppEntryResponse } from "../modules/AppEntry";
+import { AppEntry, type AllApps, type AppEntryResponse } from "../modules/AppEntry";
 import { invoke } from "@tauri-apps/api";
 
 const CACHE_TIME = 60_000;
@@ -30,6 +30,12 @@ export async function loadShared(forceRefresh = false) {
         _sharedApps.set(newShared.map(AppEntry.create));
         _lastLoadShared.set(Date.now());
     }
+}
+export function filesChanged(apps: AllApps) {
+    _myApps.set(apps.userApps.map(AppEntry.create));
+    _lastLoadMyApps.set(Date.now());
+    _sharedApps.set(apps.sharedApps.map(AppEntry.create));
+    _lastLoadShared.set(Date.now());
 }
 
 

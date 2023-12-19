@@ -36,13 +36,6 @@
         let unlistenOk: Nullish<UnlistenFn>;
         let unlistenErr: Nullish<UnlistenFn>;
         listen("entry_update_ok", async () => {
-            isLoading = true;
-            if (entry.absolutePath.includes(".local")) {
-                await loadMyApps(true);
-            } else {
-                await loadShared(true);
-            }
-            isLoading = false;
             goToPage({ page: PageName.INDEX });
         }).then((ul) => {
             unlistenOk = ul;

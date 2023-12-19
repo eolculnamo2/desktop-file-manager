@@ -16,6 +16,7 @@ tauri-build = { version = "1.5", features = [] }
 tauri = { version = "1.5", features = [ "api-all"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+notify = "6.1.1"
 
 # internal
 manager_core = { path = "../manager_core" }

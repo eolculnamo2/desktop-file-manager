@@ -5,15 +5,21 @@
     import ViewAppEntryPage from "./pages/ViewAppEntryPage.svelte";
     import { PageName, currentPage } from "./store/nav_store";
     import { listen } from "@tauri-apps/api/event";
-    import { handle_new_log, type Log } from "./store/log_store";
+    import { handleNewLog, type Log } from "./store/log_store";
     import LogsPage from "./pages/LogsPage.svelte";
     import AboutPage from "./pages/AboutPage.svelte";
     import HelpPage from "./pages/HelpPage.svelte";
+    import type { AllApps } from "./modules/AppEntry";
+    import { filesChanged } from "./store/entries_store";
 
     onMount(() => {
         listen("log", (message) => {
             const l = message.payload as Log;
-            handle_new_log(l);
+            handleNewLog(l);
+        });
+        listen("files_altered", (message) => {
+            const l = message.payload as AllApps;
+            filesChanged(l);
         });
     });
 </script>

@@ -1440,6 +1440,7 @@ name = "gnome-app-manager"
 version = "0.0.0"
 dependencies = [
  "manager_core",
+ "notify",
  "serde",
  "serde_json",
  "tauri",

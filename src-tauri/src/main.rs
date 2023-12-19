@@ -1,16 +1,38 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+pub mod file_watcher;
+
 use std::{
-    sync::{mpsc::channel, Arc},
+    cell::OnceCell,
+    path::Path,
+    sync::{
+        mpsc::{channel, Sender},
+        Arc, Mutex,
+    },
     thread,
     time::Instant,
 };
 
-use manager_core::{app_entry::AppEntry, app_entry_write, app_finder, logger};
+use file_watcher::watch_for_changes;
+use manager_core::{
+    app_entry::AppEntry,
+    app_entry_write, app_finder,
+    constants::location_constants::{self},
+    logger::{self, Log},
+};
+use notify::{RecursiveMode, Watcher};
+use serde::{Deserialize, Serialize};
 use tauri::Manager;
 
 const EMIT_FAILED: &'static str = "Emit failed";
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AllApps {
+    user_apps: Vec<AppEntry>,
+    shared_apps: Vec<AppEntry>,
+}
 
 // this is how the front end will ask for information
 #[tauri::command]
@@ -37,12 +59,55 @@ async fn get_user_apps(_app: tauri::AppHandle) -> app_finder::Result<Vec<AppEntr
     apps
 }
 
+// why can i use mutex, but not rwlock?
+pub static TX_FILE_WATCHER: Mutex<OnceCell<Sender<notify::Event>>> = Mutex::new(OnceCell::new());
+
+// TODO need to come up with a way to break this file apart
 fn main() {
     let (tx, rx) = channel();
+    let (tx_file_watcher, rx_file_watcher) = channel();
+
     logger::init_channel(tx);
+
+    if let Err(e) = TX_FILE_WATCHER
+        .lock()
+        .expect("Failed to acquire file watcher lock")
+        .set(tx_file_watcher)
+    {
+        Log::error(format!("Failed to set watcher {:?}", e)).send_log();
+    }
+
+    let mut watcher = watch_for_changes().expect("failed to start watching");
+    let user_apps = location_constants::get_user_app();
+    watcher
+        .watch(Path::new(&user_apps), RecursiveMode::Recursive)
+        .expect("Unable to watch");
+
     tauri::Builder::default()
         .setup(|app| {
             let main_window = Arc::new(app.get_window("main").unwrap());
+
+            let main_window_clone = main_window.clone();
+            thread::spawn(move || loop {
+                match rx_file_watcher.recv() {
+                    Err(e) => {
+                        eprintln!("Receiver failed! {}", e);
+                    }
+                    Ok(_) => {
+                        if let Ok(user_apps) = app_finder::list_user_apps() {
+                            if let Ok(shared_apps) = app_finder::list_shared_apps() {
+                                let all_apps = AllApps {
+                                    user_apps,
+                                    shared_apps,
+                                };
+                                main_window_clone
+                                    .emit("files_altered", all_apps)
+                                    .expect("Failed to send files altered");
+                            }
+                        }
+                    }
+                };
+            });
 
             let main_window_clone = main_window.clone();
             thread::spawn(move || loop {

@@ -38,14 +38,6 @@
         let unlistenOk: Nullish<UnlistenFn>;
         let unlistenErr: Nullish<UnlistenFn>;
         listen("entry_create_ok", async () => {
-            isLoading = true;
-            if (form.absolutePath == APP_VISIBILITY.LOCAL) {
-                await loadMyApps(true);
-            }
-            if (form.absolutePath == APP_VISIBILITY.SHARED) {
-                await loadShared(true);
-            }
-            isLoading = false;
             goToPage({ page: PageName.INDEX });
         }).then((ul) => {
             unlistenOk = ul;
