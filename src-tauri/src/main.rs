@@ -4,11 +4,10 @@
 pub mod file_watcher;
 
 use std::{
-    cell::OnceCell,
     path::Path,
     sync::{
         mpsc::{channel, Sender},
-        Arc, Mutex,
+        Arc, OnceLock,
     },
     thread,
     time::Instant,
@@ -59,22 +58,19 @@ async fn get_user_apps(_app: tauri::AppHandle) -> app_finder::Result<Vec<AppEntr
     apps
 }
 
-// why can i use mutex, but not rwlock?
-pub static TX_FILE_WATCHER: Mutex<OnceCell<Sender<notify::Event>>> = Mutex::new(OnceCell::new());
+// why can i use mutex, but not rwlock for OnceCell?
+// pub static TX_FILE_WATCHER: Mutex<OnceCell<Sender<notify::Event>>> = Mutex::new(OnceCell::new());
+pub static TX_FILE_WATCHER: OnceLock<Sender<notify::Event>> = OnceLock::new();
 
-// TODO need to come up with a way to break this file apart
+// TODO need t
 fn main() {
     let (tx, rx) = channel();
     let (tx_file_watcher, rx_file_watcher) = channel();
 
     logger::init_channel(tx);
 
-    if let Err(e) = TX_FILE_WATCHER
-        .lock()
-        .expect("Failed to acquire file watcher lock")
-        .set(tx_file_watcher)
-    {
-        Log::error(format!("Failed to set watcher {:?}", e)).send_log();
+    if let Err(e) = TX_FILE_WATCHER.set(tx_file_watcher) {
+        Log::error(format!("File watcher already set {:?}", e)).send_log();
     }
 
     let mut watcher = watch_for_changes().expect("failed to start watching");
