@@ -12,4 +12,4 @@ TODO:
 5. Good keyboard navigation -- would love to make Vimium work or something
 6. Finish Help page.
 7. Finish About page.
-8. Save logs to file system.
+8. Read logs from file system and add a way to clear logs from UI.
