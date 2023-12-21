@@ -15,9 +15,11 @@ use std::{
 
 use file_watcher::watch_for_changes;
 use manager_core::{
-    app_entry::AppEntry,
-    app_entry_write, app_finder,
+    app_entry::{events_list_types, AppEntry},
+    app_entry_write,
+    app_finder::{self, ListAppError},
     constants::location_constants::{self},
+    delete_entry::{delete_entry, DeleteEntryError},
     logger::{self, Log},
 };
 use notify::{RecursiveMode, Watcher};
@@ -29,8 +31,16 @@ const EMIT_FAILED: &'static str = "Emit failed";
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct AllApps {
-    user_apps: Vec<AppEntry>,
-    shared_apps: Vec<AppEntry>,
+    user_apps: Option<Vec<AppEntry>>,
+    shared_apps: Option<Vec<AppEntry>>,
+}
+impl AllApps {
+    fn new() -> Self {
+        Self {
+            user_apps: None,
+            shared_apps: None,
+        }
+    }
 }
 
 // this is how the front end will ask for information
@@ -58,11 +68,32 @@ async fn get_user_apps(_app: tauri::AppHandle) -> app_finder::Result<Vec<AppEntr
     apps
 }
 
+#[derive(Serialize, Deserialize)]
+enum DeleteEntryCommandError {
+    DeleteError(DeleteEntryError),
+    LoadAppFailure(ListAppError),
+}
+impl From<DeleteEntryError> for DeleteEntryCommandError {
+    fn from(value: DeleteEntryError) -> Self {
+        DeleteEntryCommandError::DeleteError(value)
+    }
+}
+impl From<ListAppError> for DeleteEntryCommandError {
+    fn from(value: ListAppError) -> Self {
+        DeleteEntryCommandError::LoadAppFailure(value)
+    }
+}
+
+#[tauri::command]
+async fn delete_entry_command(app_entry: AppEntry) -> Result<(), DeleteEntryCommandError> {
+    delete_entry(app_entry)?;
+    Ok(())
+}
+
 // why can i use mutex, but not rwlock for OnceCell?
 // pub static TX_FILE_WATCHER: Mutex<OnceCell<Sender<notify::Event>>> = Mutex::new(OnceCell::new());
 pub static TX_FILE_WATCHER: OnceLock<Sender<notify::Event>> = OnceLock::new();
 
-// TODO need t
 fn main() {
     let (tx, rx) = channel();
     let (tx_file_watcher, rx_file_watcher) = channel();
@@ -89,18 +120,23 @@ fn main() {
                     Err(e) => {
                         eprintln!("Receiver failed! {}", e);
                     }
-                    Ok(_) => {
-                        if let Ok(user_apps) = app_finder::list_user_apps() {
-                            if let Ok(shared_apps) = app_finder::list_shared_apps() {
-                                let all_apps = AllApps {
-                                    user_apps,
-                                    shared_apps,
-                                };
-                                main_window_clone
-                                    .emit("files_altered", all_apps)
-                                    .expect("Failed to send files altered");
+                    Ok(event) => {
+                        let changed_folders = events_list_types(event.paths);
+                        let mut updated_apps = AllApps::new();
+
+                        if changed_folders.has_user {
+                            if let Ok(user_apps) = app_finder::list_user_apps() {
+                                updated_apps.user_apps = Some(user_apps);
                             }
                         }
+                        if changed_folders.has_shared {
+                            if let Ok(shared_apps) = app_finder::list_shared_apps() {
+                                updated_apps.shared_apps = Some(shared_apps);
+                            }
+                        }
+                        main_window_clone
+                            .emit("files_altered", updated_apps)
+                            .expect("Failed to send files altered");
                     }
                 };
             });
@@ -181,7 +217,11 @@ fn main() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![get_user_apps, get_shared_apps])
+        .invoke_handler(tauri::generate_handler![
+            get_user_apps,
+            get_shared_apps,
+            delete_entry_command
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -2,7 +2,9 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+use crate::constants::location_constants::{get_shared_app, get_user_app};
+
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 pub enum Access {
     Shared,
     User,
@@ -41,6 +43,30 @@ impl From<String> for AppType {
 pub enum Encoding {
     UTF8,
     Other(String),
+}
+
+pub struct EventListContains {
+    pub has_user: bool,
+    pub has_shared: bool,
+}
+impl EventListContains {
+    fn new() -> Self {
+        Self {
+            has_user: false,
+            has_shared: false,
+        }
+    }
+}
+pub fn events_list_types(paths: Vec<PathBuf>) -> EventListContains {
+    let mut event_list_contains = EventListContains::new();
+    for p in paths {
+        if p.starts_with(get_shared_app()) {
+            event_list_contains.has_shared = true;
+        } else if p.starts_with(get_user_app()) {
+            event_list_contains.has_user = true;
+        }
+    }
+    event_list_contains
 }
 
 /// [Desktop Entry] the Desktop Entry group header identifies the file as a desktop entry

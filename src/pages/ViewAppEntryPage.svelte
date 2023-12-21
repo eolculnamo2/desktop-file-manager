@@ -17,13 +17,16 @@
         Column,
         ToastNotification,
         ProgressBar,
+        ComposedModal,
+        ModalHeader,
+        ModalBody,
+        ModalFooter,
     } from "carbon-components-svelte";
     import { PageName, goToPage } from "../store/nav_store";
-    import { convertFileSrc } from "@tauri-apps/api/tauri";
+    import { convertFileSrc, invoke } from "@tauri-apps/api/tauri";
     import AlignRight from "../lib/AlignRight.svelte";
     import { emit, listen, type UnlistenFn } from "@tauri-apps/api/event";
     import { onMount } from "svelte";
-    import { loadMyApps, loadShared } from "../store/entries_store";
 
     // LEFT OFF HERE. NEED TO FIGURE OUT WHERE ICONS
     // ARE LOCATED FOR SHARED APPS
@@ -31,6 +34,7 @@
     let form = structuredClone(entry);
     let errorMsg: Nullish<string> = null;
     let isLoading = false;
+    let showConfirmDelete = false;
 
     onMount(() => {
         let unlistenOk: Nullish<UnlistenFn>;
@@ -53,6 +57,13 @@
             directory: false,
             defaultPath: entry.absolutePath,
         });
+    }
+    async function deleteFile() {
+        // todo, handle error case
+        const result = await invoke("delete_entry_command", {
+            appEntry: AppEntry.toResponse(entry),
+        });
+        goToPage({ page: PageName.INDEX });
     }
     // TODO make location for this configurable
     // Want to also benchmark rayon for reading desktop files
@@ -94,13 +105,29 @@
                         />
                     </div>
                 </Column>
-                <div>
+                <div class="button-wrap">
                     <Button kind="tertiary" on:click={openFile}>Open Raw</Button
+                    >
+                    <Button
+                        kind="danger-tertiary"
+                        on:click={() => (showConfirmDelete = true)}
+                        >Delete Entry</Button
                     >
                 </div>
             </Row>
         </Grid>
-
+        <ComposedModal
+            open={showConfirmDelete}
+            on:submit={deleteFile}
+            on:close={() => (showConfirmDelete = false)}
+        >
+            <ModalHeader label="Changes" title="Confirm changes" />
+            <ModalBody hasForm>
+                Are you sure you want to delete this Desktop File? This does
+                *not* delete the associated application.
+            </ModalBody>
+            <ModalFooter primaryButtonText="Proceed" />
+        </ComposedModal>
         {#if isLoading}
             <ProgressBar helperText="Loading..." />
         {/if}
@@ -208,3 +235,12 @@
         </Form>
     </svelte:fragment>
 </PrimaryLayout>
+
+<style>
+    .button-wrap {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+    }
+</style>

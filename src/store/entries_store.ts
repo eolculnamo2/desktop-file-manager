@@ -32,10 +32,14 @@ export async function loadShared(forceRefresh = false) {
     }
 }
 export function filesChanged(apps: AllApps) {
-    _myApps.set(apps.userApps.map(AppEntry.create));
-    _lastLoadMyApps.set(Date.now());
-    _sharedApps.set(apps.sharedApps.map(AppEntry.create));
-    _lastLoadShared.set(Date.now());
+    if (apps.userApps) {
+        _myApps.set(apps.userApps.map(AppEntry.create));
+        _lastLoadMyApps.set(Date.now());
+    }
+    if (apps.sharedApps) {
+        _sharedApps.set(apps.sharedApps.map(AppEntry.create));
+        _lastLoadShared.set(Date.now());
+    }
 }
 
 

@@ -13,4 +13,3 @@ TODO:
 6. Finish Help page.
 7. Finish About page.
 8. Save logs to file system.
-9. Only reload files needed on notify based on paths (i.e. not both user and shared)
