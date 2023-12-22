@@ -62,13 +62,13 @@ pub fn persist_log(log: &Log) {
                 // if we fail to create the file
                 // because of NOT_FOUND, attempt to create path
                 // and try again
+                Err(err) if err.kind() == io::ErrorKind::NotFound => {
+                    handle_missing_state_dir();
+                    open_options_file =
+                        Some(create_open_options(&log_location).expect("Failed to open logs file"));
+                }
                 Err(err) => {
-                    if err.kind() == io::ErrorKind::NotFound {
-                        handle_missing_state_dir();
-                        open_options_file = Some(
-                            create_open_options(&log_location).expect("Failed to open logs file"),
-                        );
-                    }
+                    eprintln!("Failed to create open options {}", err);
                 }
             }
         }
