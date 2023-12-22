@@ -25,12 +25,12 @@ use store::{
 // }
 
 fn main() -> io::Result<()> {
+    let user_apps = app_finder::list_user_apps().expect("unable to load user apps");
+    let shared_apps = app_finder::list_shared_apps().expect("unable to load shared apps");
+
     enable_raw_mode()?;
     stdout().execute(EnterAlternateScreen)?;
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
-
-    let user_apps = app_finder::list_user_apps().expect("unable to load user apps");
-    let shared_apps = app_finder::list_shared_apps().expect("unable to load shared apps");
 
     *ENTRIES_STORE.write().expect("Failed to read entries store") = EntriesStore {
         shared_entries: shared_apps,

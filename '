@@ -42,8 +42,8 @@ pub fn index_page(frame: &mut Frame) {
         outer_layout[0],
     );
 
-    let mut user_table_state = TableState::default();
-    frame.render_stateful_widget(
+    let mut users_table_state = TableState::default();
+    frame.render_widget(
         app_entry_list(
             &ENTRIES_STORE
                 .read()
@@ -52,7 +52,6 @@ pub fn index_page(frame: &mut Frame) {
             Access::User,
         ),
         outer_layout[1],
-        &mut user_table_state,
     );
     let mut entries_table_state = TableState::default();
     frame.render_stateful_widget(

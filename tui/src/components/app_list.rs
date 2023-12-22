@@ -1,48 +1,40 @@
 use manager_core::app_entry::{Access, AppEntry};
 use ratatui::{prelude::*, widgets::*};
-// use ratatui::{
-//     style::{Color, Modifier, Style},
-//     text::Text,
-//     widgets::{Block, Borders, List, ListDirection, ListItem},
-// };
 
 // replace list and listitems with Tables
-pub fn app_entry_list<'a>(entries: &Vec<AppEntry>, list_type: Access) -> List<'a> {
-    let items: Vec<ListItem> = entries
+pub fn app_entry_list<'a>(entries: &Vec<AppEntry>, list_type: Access) -> Table<'a> {
+    let rows: Vec<Row> = entries
         .iter()
         .map(|ent| {
-            // let mut text = Text::default();
             let icon = ent.icon.clone().unwrap_or(String::new());
-            // text.extend([
-            //     ent.name.clone().blue(),
-            //     Span::raw(" "),
-            //     format!("{:?}", ent.app_type).yellow(),
-            //     Span::raw(" "),
-            //     icon.clone().blue(),
-            // ]);
-
-            let text = format!(
-                "{} ----- {:?} ----- {}",
-                ent.name.clone(),
-                ent.app_type,
-                icon.clone()
-            )
-            .cyan();
-            ListItem::new(text)
+            let cells = vec![
+                Cell::from(ent.name.clone()),
+                Cell::from(format!("{:?}", ent.app_type.clone())),
+                Cell::from(icon),
+            ];
+            Row::new(cells)
         })
         .collect();
-    List::new(items)
-        .block(
-            Block::default()
-                .title(match list_type {
-                    Access::User => "User entries",
-                    Access::Shared => "Shared entries",
-                })
-                .borders(Borders::ALL),
-        )
-        .style(Style::default().fg(Color::White))
-        .highlight_style(Style::default().add_modifier(Modifier::ITALIC))
-        .highlight_symbol(">>")
-        .repeat_highlight_symbol(true)
-        .direction(ListDirection::TopToBottom)
+    let header_cells = ["Name", "Type", "Icon Location"]
+        .iter()
+        .map(|h| Cell::from(*h).style(Style::default().fg(Color::Cyan)));
+    let header = Row::new(header_cells).height(1).bottom_margin(1);
+    Table::new(
+        rows,
+        [
+            Constraint::Percentage(25),
+            Constraint::Max(25),
+            Constraint::Min(50),
+        ],
+    )
+    .header(header)
+    .block(
+        Block::default()
+            .borders(Borders::ALL)
+            .title(match list_type {
+                Access::User => "User entries",
+                Access::Shared => "Shared entries",
+            }),
+    )
+    .highlight_symbol(">> ")
 }
