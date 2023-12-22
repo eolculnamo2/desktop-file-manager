@@ -20,6 +20,7 @@ notify = "6.1.1"
 
 # internal
 manager_core = { path = "../manager_core" }
+logger = { path = "../logger" }
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

@@ -7,4 +7,3 @@ pub mod constants;
 pub mod delete_entry;
 mod desktop_file_parser;
 pub mod generate_entry_file_contents;
-pub mod logger;

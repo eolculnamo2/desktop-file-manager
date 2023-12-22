@@ -1,12 +1,13 @@
 use std::{fs, io, path::Path};
 
+use logger::log::Log;
+
 use crate::{
     app_entry::AppEntry,
     constants::location_constants::{get_shared_app, get_user_app, SHARED_TYPE, USER_TYPE},
     generate_entry_file_contents::{
         generate_header, generate_map_contents_from_entry, generate_vec_contents_from_entry,
     },
-    logger::Log,
 };
 
 #[derive(Debug, Clone)]

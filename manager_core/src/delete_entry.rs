@@ -1,9 +1,9 @@
+use logger::log::Log;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     app_entry::{Access, AppEntry},
     constants::location_constants::get_shared_app,
-    logger::Log,
 };
 use std::{fs, io};
 

@@ -1,11 +1,10 @@
-use manager_core::logger::Log;
-
 use notify::{
     event::{CreateKind, RemoveKind},
     EventKind, RecommendedWatcher,
 };
 
 use crate::TX_FILE_WATCHER;
+use logger::log::Log;
 
 fn should_handle_update(event: &notify::Event) -> bool {
     if event.kind == EventKind::Create(CreateKind::File) {

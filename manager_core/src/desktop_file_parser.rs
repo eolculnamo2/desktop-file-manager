@@ -4,17 +4,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::app_entry::{AppEntry, AppType, EntryTypes};
 
-//[Desktop Entry]
-// Version=1.1
-// Type=Application
-// Name=Firefox
-// GenericName=Firefox
-// Comment=A small descriptive blurb about this application.
-// Icon=/Apps/firefox/browser/chrome/icons/default/default48.png
-// Exec=/Apps/firefox/firefox
-// Actions=
-// Categories=WebBrowser;X-GNOME-Other;X-GNOME-WebApplications;
-
 fn parse_categories(raw: &str) -> Vec<String> {
     let mut categories: Vec<String> = vec![];
     let mut split = raw.split(";");

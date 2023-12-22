@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { open } from "@tauri-apps/api/dialog";
     import PrimaryLayout from "../layouts/PrimaryLayout.svelte";
     import {
         ENCODING,

@@ -3,15 +3,14 @@ use std::{
     sync::Mutex,
 };
 
+use logger::log::Log;
 use rayon::iter::{ParallelBridge, ParallelIterator};
-// use rayon::prelude*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     app_entry::AppEntry,
     constants::location_constants::{get_shared_app, get_user_app},
     desktop_file_parser::{self, DesktopFileParseError},
-    logger::Log,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

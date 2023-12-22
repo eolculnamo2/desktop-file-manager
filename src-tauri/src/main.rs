@@ -20,8 +20,9 @@ use manager_core::{
     app_finder::{self, ListAppError},
     constants::location_constants::{self},
     delete_entry::{delete_entry, DeleteEntryError},
-    logger::{self, Log},
 };
+
+use logger::{log::Log, log_channel::init_logger_channel};
 use notify::{RecursiveMode, Watcher};
 use serde::{Deserialize, Serialize};
 use tauri::Manager;
@@ -48,7 +49,7 @@ impl AllApps {
 async fn get_shared_apps(_app: tauri::AppHandle) -> app_finder::Result<Vec<AppEntry>> {
     let i = Instant::now();
     let apps = app_finder::list_shared_apps();
-    logger::Log::trace(format!(
+    Log::trace(format!(
         "Time to fetch shared apps time in nanos {}",
         i.elapsed().as_nanos()
     ))
@@ -60,7 +61,7 @@ async fn get_shared_apps(_app: tauri::AppHandle) -> app_finder::Result<Vec<AppEn
 async fn get_user_apps(_app: tauri::AppHandle) -> app_finder::Result<Vec<AppEntry>> {
     let i = Instant::now();
     let apps = app_finder::list_user_apps();
-    logger::Log::trace(format!(
+    Log::trace(format!(
         "Time to fetch user apps time in nanos {}",
         i.elapsed().as_nanos()
     ))
@@ -98,7 +99,7 @@ fn main() {
     let (tx, rx) = channel();
     let (tx_file_watcher, rx_file_watcher) = channel();
 
-    logger::init_channel(tx);
+    init_logger_channel(tx);
 
     if let Err(e) = TX_FILE_WATCHER.set(tx_file_watcher) {
         Log::error(format!("File watcher already set {:?}", e)).send_log();
