@@ -1,8 +1,14 @@
 use manager_core::app_entry::{Access, AppEntry};
 use ratatui::{prelude::*, widgets::*};
 
+use crate::store::tui_store::get_selected_style;
+
 // replace list and listitems with Tables
-pub fn app_entry_list<'a>(entries: &Vec<AppEntry>, list_type: Access) -> Table<'a> {
+pub fn app_entry_list<'a>(
+    entries: &Vec<AppEntry>,
+    list_type: Access,
+    is_current_tab: bool,
+) -> Table<'a> {
     let rows: Vec<Row> = entries
         .iter()
         .map(|ent| {
@@ -15,10 +21,16 @@ pub fn app_entry_list<'a>(entries: &Vec<AppEntry>, list_type: Access) -> Table<'
             Row::new(cells)
         })
         .collect();
+
     let header_cells = ["Name", "Type", "Icon Location"]
         .iter()
         .map(|h| Cell::from(*h).style(Style::default().fg(Color::Cyan)));
-    let header = Row::new(header_cells).height(1).bottom_margin(1);
+
+    let header = Row::new(header_cells)
+        .height(1)
+        .bottom_margin(1)
+        .style(get_selected_style(is_current_tab));
+
     Table::new(
         rows,
         [
@@ -31,6 +43,7 @@ pub fn app_entry_list<'a>(entries: &Vec<AppEntry>, list_type: Access) -> Table<'
     .block(
         Block::default()
             .borders(Borders::ALL)
+            .border_style(get_selected_style(is_current_tab))
             .title(match list_type {
                 Access::User => "User entries",
                 Access::Shared => "Shared entries",

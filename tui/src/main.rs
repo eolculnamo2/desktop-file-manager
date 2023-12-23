@@ -1,8 +1,10 @@
+mod app;
 mod components;
 mod event_handler;
 mod screens;
 mod store;
 
+use app::App;
 use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
     ExecutableCommand,
@@ -27,6 +29,7 @@ use store::{
 fn main() -> io::Result<()> {
     let user_apps = app_finder::list_user_apps().expect("unable to load user apps");
     let shared_apps = app_finder::list_shared_apps().expect("unable to load shared apps");
+    let mut app = App::new();
 
     enable_raw_mode()?;
     stdout().execute(EnterAlternateScreen)?;
@@ -39,8 +42,8 @@ fn main() -> io::Result<()> {
 
     // while should_quit() == false {
     while TUI_STORE.read().unwrap().quit == false {
-        terminal.draw(ui)?;
-        handle_events()?;
+        terminal.draw(|f| ui(f, &mut app))?;
+        handle_events(&mut app)?;
     }
 
     disable_raw_mode()?;
@@ -48,8 +51,8 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-fn ui(frame: &mut Frame) {
+fn ui(frame: &mut Frame, app: &mut App) {
     match NAV_STORE.read().unwrap().get_current_screen() {
-        Screens::Index => index_page(frame),
+        Screens::Index => index_page(frame, app),
     };
 }

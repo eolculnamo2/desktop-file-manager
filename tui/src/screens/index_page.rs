@@ -3,14 +3,21 @@ use ratatui::{
     layout::{Constraint, Direction, Layout},
     style::{Style, Stylize},
     text::{Line, Span},
-    widgets::{Block, Borders, Paragraph, TableState},
+    widgets::{Block, Borders, Paragraph},
     Frame,
 };
 
-use crate::{components::app_list::app_entry_list, store::entries_store::ENTRIES_STORE};
+use crate::{
+    app::App,
+    components::app_list::app_entry_list,
+    store::{
+        entries_store::ENTRIES_STORE,
+        tui_store::{get_selected_style, Tab, TUI_STORE},
+    },
+};
 
 // Next is to populate lists with formatted data rows
-pub fn index_page(frame: &mut Frame) {
+pub fn index_page(frame: &mut Frame, app: &mut App) {
     let outer_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(vec![
@@ -37,12 +44,18 @@ pub fn index_page(frame: &mut Frame) {
         Line::from("Push 'l' to view logs".green()),
         Line::from("Push 'q' to quit".red()),
     ];
+
+    let mut current_tab = Tab::None;
+    {
+        current_tab = TUI_STORE.read().expect("Lock poisoned").current_tab.clone();
+    }
     frame.render_widget(
-        Paragraph::new(text).block(Block::new().borders(Borders::ALL)),
+        Paragraph::new(text)
+            .style(get_selected_style(current_tab == Tab::Header))
+            .block(Block::new().borders(Borders::ALL)),
         outer_layout[0],
     );
 
-    let mut user_table_state = TableState::default();
     frame.render_stateful_widget(
         app_entry_list(
             &ENTRIES_STORE
@@ -50,11 +63,12 @@ pub fn index_page(frame: &mut Frame) {
                 .expect("Failed to read users entries")
                 .user_entries,
             Access::User,
+            current_tab == Tab::UserEntryList,
         ),
         outer_layout[1],
-        &mut user_table_state,
+        &mut app.index_page_state.user_table_state,
     );
-    let mut entries_table_state = TableState::default();
+
     frame.render_stateful_widget(
         app_entry_list(
             &ENTRIES_STORE
@@ -62,8 +76,9 @@ pub fn index_page(frame: &mut Frame) {
                 .expect("Failed to read shared entries")
                 .shared_entries,
             Access::Shared,
+            current_tab == Tab::SharedEntryList,
         ),
         inner_layout[0],
-        &mut entries_table_state,
+        &mut app.index_page_state.shared_table_state,
     );
 }
