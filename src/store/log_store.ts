@@ -25,3 +25,8 @@ export function handleNewLog(l: Log) {
     _logs.update(prev => [l, ...prev]);
 }
 
+export function logsCleared() {
+    _logs.set([]);
+    _logsFromDisk.reset?.();
+}
+

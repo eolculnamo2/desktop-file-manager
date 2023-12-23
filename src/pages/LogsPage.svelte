@@ -1,13 +1,15 @@
 <script lang="ts">
-    import { Checkbox, Grid, Row } from "carbon-components-svelte";
+    import { Button, Checkbox, Grid, Row } from "carbon-components-svelte";
     import {
         allLogs,
         addLogsFromDisk,
         logsFromDisk,
+        logsCleared,
         type Log,
     } from "../store/log_store";
     import PrimaryLayout from "../layouts/PrimaryLayout.svelte";
     import { invoke } from "@tauri-apps/api";
+    import AlignRight from "../lib/AlignRight.svelte";
 
     let logsToDisplay = ["info", "warn", "error"];
     function formatLog(l: Log) {
@@ -29,7 +31,17 @@
 
 <PrimaryLayout>
     <svelte:fragment slot="header">
+        <AlignRight>
+            <Button
+                kind="tertiary"
+                on:click={() => {
+                    invoke("delete_logs_file");
+                    logsCleared();
+                }}>Delete Logs</Button
+            >
+        </AlignRight>
         <h1 class="title">Logs</h1>
+
         <div class="row">
             <a href="https://tauri.app" target="_blank">
                 <img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />

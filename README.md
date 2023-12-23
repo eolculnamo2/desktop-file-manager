@@ -1,6 +1,4 @@
-# Tauri + Svelte + Typescript
-
-A .desktop file manager for Gnome 
+A project to practice rust -- A .desktop file manager 
 
 pnpm tauri dev to begin local environment
 
@@ -12,4 +10,3 @@ TODO:
 5. Good keyboard navigation -- would love to make Vimium work or something
 6. Finish Help page.
 7. Finish About page.
-8. Add a way to clear logs from UI. (Could move logger to its own lib)

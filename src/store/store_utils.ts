@@ -1,18 +1,18 @@
-import { writable } from "svelte/store";
+import { writable, type Writable } from "svelte/store";
 
 const writeMap = new Set<string>();
+export type WriteOnce<T> = Writable<T> & { reset?: () => void }
 export function writeOnce<T>(name: string, value: T) {
-    const w = writable(value);
+    const w: WriteOnce<T> = writable(value);
     const originalSetter = w.set;
     w.set = (value: T) => {
-        console.log('attempting writing')
         if (writeMap.has(name)) {
             return;
         }
-        console.log('writing')
         writeMap.add(name);
         originalSetter(value);
     }
+    w.reset = () => originalSetter(value);
     return w;
 }
 

@@ -1,4 +1,4 @@
-use std::{fs, time::SystemTime};
+use std::{fs, io, time::SystemTime};
 
 use chrono::DateTime;
 
@@ -19,7 +19,11 @@ fn parse_log_from_string(s: &str) -> Log {
                 level = l;
             }
             Err(e) => {
-                eprintln!("Failed to infer level from string {}: {}", level_str, e);
+                Log::error(format!(
+                    "Failed to infer level from string {}: {}",
+                    level_str, e
+                ))
+                .send_log();
             }
         };
         // TIMESTAMP and MESSAGE
@@ -29,10 +33,11 @@ fn parse_log_from_string(s: &str) -> Log {
                     timestamp = datetime.into();
                 }
                 Err(e) => {
-                    eprintln!(
+                    Log::error(format!(
                         "Failed to parse datetime from string {} with err {}",
                         timestamp_str, e
-                    );
+                    ))
+                    .send_log();
                 }
             }
             message = msg.to_string();
@@ -47,20 +52,25 @@ pub fn read_logs() -> Vec<Log> {
     let log_location_dir =
         expanduser::expanduser(RELATIVE_LOG_LOCATION).expect("Failed to expand relative");
 
-    if let Ok(logs) = fs::read(log_location_dir) {
-        let logs_string = if let Ok(s) = String::from_utf8(logs) {
-            s
-        } else {
-            eprintln!("Failed to read log");
-            String::new()
-        };
-        logs_string
-            .split('\n')
-            .map(parse_log_from_string)
-            .filter(|l| l.message.len() > 0) // filter out invalid entries
-            .collect()
-    } else {
-        eprintln!("Failed to read from dir");
-        Vec::new()
+    match fs::read(log_location_dir) {
+        Ok(logs) => {
+            let logs_string = if let Ok(s) = String::from_utf8(logs) {
+                s
+            } else {
+                Log::error(String::from("Failed to read log")).send_log();
+                String::new()
+            };
+            logs_string
+                .split('\n')
+                .map(parse_log_from_string)
+                .filter(|l| l.message.len() > 0) // filter out invalid entries
+                .collect()
+        }
+        Err(e) => {
+            if e.kind() != io::ErrorKind::NotFound {
+                Log::error(String::from("Failed to read from dir")).send_log();
+            }
+            Vec::new()
+        }
     }
 }
