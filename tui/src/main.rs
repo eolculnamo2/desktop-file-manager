@@ -12,7 +12,7 @@ use crossterm::{
 use event_handler::handle_events;
 use manager_core::app_finder;
 use ratatui::prelude::*;
-use screens::index_page::index_page;
+use screens::{create_entry_screen::create_entry_page, index_page::index_page};
 use std::io::{self, stdout};
 use store::{entries_store::EntriesStore, nav_store::Screens};
 
@@ -43,5 +43,6 @@ fn main() -> io::Result<()> {
 fn ui(frame: &mut Frame, app: &mut App) {
     match app.nav_state.get_current_screen() {
         Screens::Index => index_page(frame, app),
+        Screens::Create => create_entry_page(frame, app),
     };
 }

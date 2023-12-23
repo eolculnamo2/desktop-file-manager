@@ -2,7 +2,10 @@ use std::io;
 
 use crossterm::event::{self, Event, KeyCode};
 
-use crate::{app::App, store::tui_store::Tab};
+use crate::{
+    app::App,
+    store::{nav_store::Screens, tui_store::Tab},
+};
 
 pub fn handle_events(app: &mut App) -> io::Result<()> {
     // would it be better to use mpsc instead of polling?
@@ -10,6 +13,10 @@ pub fn handle_events(app: &mut App) -> io::Result<()> {
         if let Event::Key(key) = event::read()? {
             if key.kind == event::KeyEventKind::Press && key.code == KeyCode::Char('q') {
                 app.tui_state.shutdown();
+            } else if key.kind == event::KeyEventKind::Press && key.code == KeyCode::Char('n') {
+                app.nav_state.go_to(Screens::Create);
+            } else if key.kind == event::KeyEventKind::Press && key.code == KeyCode::Char('h') {
+                app.nav_state.go_to(Screens::Index);
             } else if key.kind == event::KeyEventKind::Press && key.code == KeyCode::Tab {
                 app.tui_state.next_tab();
             } else if key.kind == event::KeyEventKind::Press && key.code == KeyCode::BackTab {

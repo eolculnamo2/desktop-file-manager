@@ -1,6 +1,7 @@
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Screens {
     Index,
+    Create,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

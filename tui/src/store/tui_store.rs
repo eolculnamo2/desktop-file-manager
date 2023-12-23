@@ -7,6 +7,7 @@ pub enum Tab {
     UserEntryList,
     SharedEntryList,
 }
+
 pub fn get_selected_style(is_current_tab: bool) -> Style {
     if is_current_tab {
         Style::new().yellow()
@@ -16,9 +17,7 @@ pub fn get_selected_style(is_current_tab: bool) -> Style {
 }
 
 impl Tab {
-    // I tried to do this with a linked list and vector
-    // but didn't work well with my static level state (which might be a flawed strategy
-    // to begin with)
+    // think about switching this doubly linked list?
     fn handle_next(&self, reverse: bool) -> Self {
         match self {
             Tab::None if reverse => Tab::SharedEntryList,
