@@ -12,6 +12,19 @@ pub enum LogLevel {
     Error,
 }
 
+impl TryFrom<&str> for LogLevel {
+    type Error = String;
+    fn try_from(value: &str) -> Result<Self, String> {
+        match value.trim().to_lowercase().as_str() {
+            "trace" => Ok(LogLevel::Trace),
+            "info" => Ok(LogLevel::Info),
+            "warn" => Ok(LogLevel::Warn),
+            "error" => Ok(LogLevel::Error),
+            _ => Err("Invalid value".to_string()),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Log {
     pub timestamp: SystemTime,

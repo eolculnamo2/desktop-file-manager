@@ -1,7 +1,13 @@
 <script lang="ts">
     import { Checkbox, Grid, Row } from "carbon-components-svelte";
-    import { logs, type Log } from "../store/log_store";
+    import {
+        allLogs,
+        addLogsFromDisk,
+        logsFromDisk,
+        type Log,
+    } from "../store/log_store";
     import PrimaryLayout from "../layouts/PrimaryLayout.svelte";
+    import { invoke } from "@tauri-apps/api";
 
     let logsToDisplay = ["info", "warn", "error"];
     function formatLog(l: Log) {
@@ -10,6 +16,15 @@
         ).toLocaleTimeString();
         return ` ${localTimestamp} -- ${l.message}`;
     }
+
+    async function getLogsFromDisk() {
+        const diskLogs = await invoke<Log[]>("get_logs_from_disk");
+        console.log("diskLogs", diskLogs);
+        addLogsFromDisk(diskLogs);
+    }
+
+    // start loading from disk before mount
+    getLogsFromDisk();
 </script>
 
 <PrimaryLayout>
@@ -51,9 +66,9 @@
         <hr />
     </svelte:fragment>
     <svelte:fragment slot="body">
-        {#if $logs.length > 0}
+        {#if $allLogs.length > 0}
             <Grid>
-                {#each $logs as log}
+                {#each $allLogs as log}
                     {#if logsToDisplay.includes(log.level.toLowerCase())}
                         <Row>
                             <div class="message-row">

@@ -2,16 +2,14 @@ use std::{
     fs::{DirBuilder, File, OpenOptions},
     io::{self, Write},
     path::PathBuf,
-    sync::{OnceLock, RwLock},
 };
 
 use chrono::{DateTime, Utc};
 
-use crate::log::Log;
-
-const RELATIVE_LOG_DIR: &'static str = "~/.local/state/derpity";
-const RELATIVE_LOG_LOCATION: &'static str = "~/.local/state/derpity/logs.txt";
-static LOG_LOCATION: RwLock<OnceLock<PathBuf>> = RwLock::new(OnceLock::new());
+use crate::{
+    constants::{LOG_LOCATION, RELATIVE_LOG_DIR, RELATIVE_LOG_LOCATION, TIMESTAMP_SHAPE},
+    log::Log,
+};
 
 fn is_location_unset() -> bool {
     LOG_LOCATION
@@ -77,7 +75,7 @@ pub fn persist_log(log: &Log) {
         let log_input = format!(
             "{:?} [{}] {}\n",
             &log.level,
-            datetime.format("%d/%m/%Y %T"),
+            datetime.format(TIMESTAMP_SHAPE),
             &log.message
         );
 

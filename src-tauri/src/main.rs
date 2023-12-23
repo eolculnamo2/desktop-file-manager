@@ -22,7 +22,7 @@ use manager_core::{
     delete_entry::{delete_entry, DeleteEntryError},
 };
 
-use logger::{log::Log, log_channel::init_logger_channel};
+use logger::{log::Log, log_channel::init_logger_channel, read_logs::read_logs};
 use notify::{RecursiveMode, Watcher};
 use serde::{Deserialize, Serialize};
 use tauri::Manager;
@@ -89,6 +89,11 @@ impl From<ListAppError> for DeleteEntryCommandError {
 async fn delete_entry_command(app_entry: AppEntry) -> Result<(), DeleteEntryCommandError> {
     delete_entry(app_entry)?;
     Ok(())
+}
+
+#[tauri::command]
+async fn get_logs_from_disk() -> Vec<Log> {
+    read_logs()
 }
 
 // why can i use mutex, but not rwlock for OnceCell?
@@ -215,13 +220,13 @@ fn main() {
                     .emit("entry_update_ok", "Done")
                     .expect(EMIT_FAILED);
             });
-
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             get_user_apps,
             get_shared_apps,
-            delete_entry_command
+            delete_entry_command,
+            get_logs_from_disk
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
