@@ -1,8 +1,4 @@
-use std::sync::RwLock;
-
 use ratatui::style::{Style, Stylize};
-
-pub static TUI_STORE: RwLock<TuiStore> = RwLock::new(TuiStore::new());
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Tab {
@@ -44,7 +40,7 @@ pub struct TuiStore {
 }
 
 impl TuiStore {
-    const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             current_tab: Tab::None,
             quit: false,

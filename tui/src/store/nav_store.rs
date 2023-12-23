@@ -1,7 +1,3 @@
-use std::sync::RwLock;
-
-pub static NAV_STORE: RwLock<NavStore> = RwLock::new(NavStore::new());
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Screens {
     Index,
@@ -13,7 +9,7 @@ pub struct NavStore {
 }
 
 impl NavStore {
-    const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             current_screen: Screens::Index,
         }
