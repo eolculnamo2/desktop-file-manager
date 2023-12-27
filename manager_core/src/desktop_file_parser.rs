@@ -58,15 +58,18 @@ pub fn get_entry_from_file(location: PathBuf) -> Result<AppEntry, DesktopFilePar
 
     #[cfg(test)]
     let file = SAMPLE;
-
     let text = String::from_utf8_lossy(&file);
 
-    if text.starts_with("[Desktop Entry]") == false {
+    let parts: Vec<&str> = text
+        .split('\n')
+        .filter(|line| line.trim().len() > 0 && line.starts_with('#') == false)
+        .collect();
+
+    if parts.len() == 0 || parts[0].starts_with("[Desktop Entry]") == false {
         eprintln!("invalid text {:?}", text);
         return Err(DesktopFileParseError::InvalidHeader);
     }
 
-    let parts = text.split('\n');
     let mut app_entry = AppEntry::new(location);
     for part in parts {
         if let Some(value) = get_property_from_text_line(part) {
